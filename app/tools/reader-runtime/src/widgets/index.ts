@@ -13,6 +13,9 @@ import { observeImageLoading } from './image-loading.ts';
 import { createInlineFeedback } from './feedback.ts';
 import { registerSummaryCommands } from '../summary/index.ts';
 import { registerStyleCommand } from '../styles/reader.ts';
+import { registerReplaceCommands } from '../replace/index.ts';
+import { registerSelectionWatch } from '../replace/selection-watch.ts';
+
 import type { ReaderConfig } from '../protocol/reader-config.ts';
 import type { ReaderHost, ReaderLayout, Unsubscribe } from '../protocol/reader-api.ts';
 export { installGestureOwnership } from '../interactions/gestures.ts';
@@ -38,6 +41,7 @@ export function createWidgets({ root, host, config, layout }: CreateWidgetsOptio
   const bionic = createBionicReading(root, bionicEnabled, () => config.runtime.editing);
   const feedback = createInlineFeedback(root, host, layout);
   const style = registerStyleCommand(host);
+  const replace = registerReplaceCommands(root, host);
   let removeAnchors: Unsubscribe | null = null;
   const commands: Unsubscribe[] = [
     installLocalVideoControl(host),
@@ -47,8 +51,10 @@ export function createWidgets({ root, host, config, layout }: CreateWidgetsOptio
     ...registerVerticalScrollCommands(host),
     ...registerSummaryCommands(host, layout),
     registerSnippetCommand(host),
+    registerSelectionWatch(root, host),
     registerNextChapterCommand(host),
-    host.onCommand('ui.configure', (value) => configureUi(value)),
+    () => replace.dispose(),
+    () => host.onCommand('ui.configure', (value) => configureUi(value)),
     host.onCommand('ui.setTtsEnabled', (value) => tts.setEnabled(readEnabled(value))),
     host.onCommand('ui.setBionic', (value) => {
       bionicEnabled = readEnabled(value);

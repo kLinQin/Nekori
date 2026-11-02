@@ -723,6 +723,7 @@
     <string name="novel_error_timeout_next_chapter">Timed out loading next chapter</string>
     <string name="novel_error_couldnt_load_next_chapter">Couldn\'t load next chapter</string>
     <string name="action_find_in_chapter">Find in chapter</string>
+    <string name="action_replace_highlight">Find &amp; Replace</string>
     <string name="find_previous_match">Previous match</string>
     <string name="find_next_match">Next match</string>
     <string name="pref_bypass_dpi">Bypass internet censorship</string>

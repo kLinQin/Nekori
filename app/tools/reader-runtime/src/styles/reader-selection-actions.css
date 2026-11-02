@@ -1,0 +1,31 @@
+.nk-selection-actions {
+    position: fixed;
+    right: 8px;
+    bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 1000;
+    align-items: flex-end;
+}
+.nk-selection-actions[hidden] { display: none; }
+
+.nk-selection-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 6px;
+    border: 1px solid #333;
+    background: #1A1A1A;
+    color: #E5E7EB;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+    font-family: system-ui, sans-serif;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+.nk-selection-btn:focus { outline: none; }

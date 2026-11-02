@@ -23,24 +23,24 @@ enum class BottomBarItem(val id: String) {
     FIND_IN_CHAPTER("find_in_chapter"),
     RELOAD_SOURCE("reload_source"),
     SUMMARIZE_CHAPTER("summarize_chapter"),
+    REPLACE_HIGHLIGHT("replace_highlight"),
 }
 
 fun BottomBarItem.isAvailable(ttsEnabled: Boolean): Boolean = this != BottomBarItem.TTS || ttsEnabled
 
 data class BottomBarItemState(
     val item: BottomBarItem,
-    val enabled: Boolean = true, // whether it appears in the bar
-    val defaultEnabled: Boolean = true, // default visibility state for reset
+    val enabled: Boolean = true,
+    val defaultEnabled: Boolean = true,
 )
 
-// Default ordering & visibility
-// Items with defaultEnabled = false are hidden by default and won't appear when resetting to default
 val DefaultBottomBarItems = listOf(
     BottomBarItemState(BottomBarItem.PREV_CHAPTER, defaultEnabled = true),
     BottomBarItemState(BottomBarItem.TRANSLATE, defaultEnabled = true),
     BottomBarItemState(BottomBarItem.SCROLL_TO_TOP, defaultEnabled = true),
     BottomBarItemState(BottomBarItem.CHAPTER_LIST, defaultEnabled = true),
     BottomBarItemState(BottomBarItem.SETTINGS, defaultEnabled = true),
+    BottomBarItemState(BottomBarItem.REPLACE_HIGHLIGHT, defaultEnabled = true),
     BottomBarItemState(BottomBarItem.NEXT_CHAPTER, defaultEnabled = true),
     BottomBarItemState(BottomBarItem.TTS, enabled = false, defaultEnabled = false),
     BottomBarItemState(BottomBarItem.AUTO_SCROLL, enabled = false, defaultEnabled = false),
@@ -65,8 +65,6 @@ fun List<BottomBarItemState>.serialize(): String =
 
 fun String.deserializeBottomBarItems(): List<BottomBarItemState> {
     val serialized = Json.decodeFromString<List<BottomBarItemStateSerialized>>(this)
-    // Merge with DefaultBottomBarItems so new items added in future app updates
-    // aren't silently dropped — they get appended at the end
     val savedIds = serialized.map { it.id }
     val savedItems = serialized.mapNotNull { s ->
         val item = BottomBarItem.entries.find { it.id == s.id } ?: return@mapNotNull null

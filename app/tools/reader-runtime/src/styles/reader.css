@@ -5,3 +5,6 @@
 @import './reader-feedback.css';
 @import './reader-controls.css';
 @import './reader-overrides.css';
+@import './reader-replace.css';
+@import './reader-selection-actions.css';
+@import './reader-quickadd.css';

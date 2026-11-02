@@ -40,6 +40,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import eu.kanade.tachiyomi.ui.reader.replace.ReplaceDrawerSheet
+import eu.kanade.tachiyomi.ui.reader.replace.ReplaceQuickAddMode
+import eu.kanade.tachiyomi.ui.reader.replace.ReplaceQuickAddSheet
+import eu.kanade.tachiyomi.ui.reader.replace.ReplaceSelectionActions
+import eu.kanade.tachiyomi.ui.reader.replace.ReplaceViewModel
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -184,6 +189,7 @@ class ReaderActivity : BaseActivity() {
     lateinit var binding: ReaderActivityBinding
 
     val viewModel by viewModels<ReaderViewModel>()
+    private val replaceViewModel by viewModels<ReplaceViewModel>()
     private var assistUrl: String? = null
 
     /**
@@ -1175,6 +1181,21 @@ class ReaderActivity : BaseActivity() {
             var showEditSaveDialog by remember { mutableStateOf(false) }
             var isEditing by remember { mutableStateOf(false) }
 
+            var showReplaceDrawer by remember { mutableStateOf(false) }
+            var replaceSelectionText by remember { mutableStateOf("") }
+            var replaceQuickAddMode by remember { mutableStateOf<ReplaceQuickAddMode?>(null) }
+            var replaceQuickAddFind by remember { mutableStateOf("") }
+            var replaceQuickAddReplace by remember { mutableStateOf("") }
+            val replaceStore by replaceViewModel.store.collectAsState()
+            val replaceColors by replaceViewModel.colors.collectAsState()
+            val replaceSelection by (state.viewer as? NovelWebViewViewer)?.replaceSelection?.collectAsState() ?: remember { mutableStateOf("") }
+            val translatedSelection by (state.viewer as? NovelWebViewViewer)?.translatedSelection?.collectAsState() ?: remember { mutableStateOf<Pair<String, String>?>(null) }
+
+            val replaceChapterKey = state.novelVisibleChapter?.id ?: state.currentChapter?.chapter?.id
+            LaunchedEffect(replaceStore, replaceColors, state.viewer, replaceChapterKey) {
+                (state.viewer as? NovelWebViewViewer)?.applyReplaceDecorations(replaceStore, replaceColors)
+            }
+
             NovelReaderAppBars(
                 visible = state.menuVisible,
                 findInPageState = findInPageState,
@@ -1325,8 +1346,61 @@ class ReaderActivity : BaseActivity() {
                 isWebView = true,
                 bottomBarItems = bottomBarItems,
                 onQuotes = ::onQuotesClicked,
+                onReplaceHighlight = { showReplaceDrawer = true },
                 ttsOverlayBottomPadding = ttsOverlayBottomPadding,
             )
+
+            if (replaceSelection.isNotBlank()) {
+                androidx.compose.foundation.layout.Box(
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    ReplaceSelectionActions(
+                        modifier = Modifier.align(androidx.compose.ui.Alignment.CenterEnd),
+                    onFindReplace = {
+                        replaceQuickAddMode = ReplaceQuickAddMode.FIND_REPLACE
+                        replaceQuickAddFind = replaceSelection
+                        replaceQuickAddReplace = ""
+                    },
+                    onHighlight = {
+                        replaceQuickAddMode = ReplaceQuickAddMode.HIGHLIGHT
+                        replaceQuickAddFind = replaceSelection
+                        replaceQuickAddReplace = ""
+                    },
+                        onTranslate = { novelViewer.emitTranslateSelection(replaceSelection) },
+                    )
+                }
+            }
+
+            translatedSelection?.let { pair ->
+                (state.viewer as? NovelWebViewViewer)?.consumeTranslatedSelection()
+                replaceQuickAddMode = ReplaceQuickAddMode.FIND_REPLACE
+                replaceQuickAddFind = pair.first
+                replaceQuickAddReplace = pair.second
+            }
+
+            replaceQuickAddMode?.let { mode ->
+                ReplaceQuickAddSheet(
+                    mode = mode,
+                    initialFind = replaceQuickAddFind,
+                    initialReplace = replaceQuickAddReplace,
+                    viewModel = replaceViewModel,
+                    onDismissRequest = { replaceQuickAddMode = null },
+                )
+            }
+
+            if (showReplaceDrawer) {
+                ReplaceDrawerSheet(
+                    store = replaceStore,
+                    colors = replaceColors,
+                    viewModel = replaceViewModel,
+                    onDismissRequest = { showReplaceDrawer = false },
+                    onExportJson = { json ->
+                        val cm = getSystemService(android.content.ClipboardManager::class.java)
+                        cm.setPrimaryClip(android.content.ClipData.newPlainText("replace-json", json))
+                        android.widget.Toast.makeText(this, "JSON copied to clipboard", android.widget.Toast.LENGTH_SHORT).show()
+                    },
+                )
+            }
 
             androidx.activity.compose.BackHandler(enabled = isEditing && state.hasUnsavedChanges) {
                 showEditSaveDialog = true
