@@ -1384,7 +1384,10 @@ class ReaderActivity : BaseActivity() {
                     initialFind = replaceQuickAddFind,
                     initialReplace = replaceQuickAddReplace,
                     viewModel = replaceViewModel,
-                    onDismissRequest = { replaceQuickAddMode = null },
+                    onDismissRequest = {
+                        replaceQuickAddMode = null
+                        (state.viewer as? NovelWebViewViewer)?.clearReplaceSelection()
+                    },
                 )
             }
 

@@ -1,3 +1,34 @@
+> [!WARNING]
+> **PERSONAL EXPERIMENTAL FORK / FORK EKSPERIMENTAL PRIBADI**
+>
+> **🇬🇧 English:**
+> This is my personal fork of [Yuneko-dev/Nekori](https://github.com/Yuneko-dev/Nekori). It contains unreleased, experimental features built for my own use. Expect bugs and breaking changes. For the stable and official version, please use the original repository.
+>
+> **🇮🇩 Indonesia:**
+> Ini adalah fork pribadi saya dari [Yuneko-dev/Nekori](https://github.com/Yuneko-dev/Nekori). Repositori ini berisi fitur eksperimental yang belum dirilis dan dibuat untuk penggunaan pribadi. Mungkin terdapat bug atau perubahan yang tidak stabil. Untuk versi stabil dan resmi, silakan gunakan repositori aslinya.
+
+---
+
+### New Features in This Fork / Fitur Baru di Fork Ini
+
+**🇬🇧 English:**
+* **Native Find & Replace & Highlight:** Added a fully native Android UI (Jetpack Compose) to manage Find & Replace entries, text highlights, and color themes. Accessible directly from the reader's bottom bar.
+* **Custom HSV Color Picker:** A built-in color picker to easily customize highlight and text colors.
+* **JSON Import & Export:** You can now backup and restore your Find & Replace profiles and color settings directly to a `.json` file using Android's native file picker.
+* **Native Selection Actions:** When you select text in the reader, a floating menu with F (Find), H (Highlight), and T (Translate) icons will appear.
+* **Direct Selection Translation:** Highlight any text and tap the Translate icon. The app will automatically translate the text (ID to EN) and open the Quick-Add form with both the original and translated text pre-filled.
+* **Live Search & Compact UI:** Added a live search bar at the top of the lists to filter through thousands of entries instantly. The UI is compact, responsive, and eliminates layout shifts.
+
+**🇮🇩 Indonesia:**
+* **Find & Replace & Highlight Native:** Menambahkan UI Android native sepenuhnya (Jetpack Compose) untuk mengelola data Find & Replace, highlight teks, dan tema warna. Dapat diakses langsung dari bottom bar reader.
+* **Custom HSV Color Picker:** Pemilih warna bawaan untuk dengan mudah menyesuaikan warna highlight dan teks.
+* **Import & Export JSON:** kamu sekarang dapat mem-backup dan me-restore profil Find & Replace serta pengaturan warna langsung ke file `.json` menggunakan file picker bawaan Android.
+* **Aksi Seleksi Native:** Saat kamu menyorot teks di reader, floating menu dengan ikon F (Find), H (Highlight), dan T (Translate) akan muncul.
+* **Terjemahan Langsung dari Seleksi:** Sorot teks apa pun dan ketuk ikon Translate. Aplikasi akan otomatis menerjemahkan teks (ID ke EN) dan membuka form Quick-Add dengan teks asli dan terjemahan yang sudah terisi.
+* **Pencarian Langsung & UI Ringkas:** Menambahkan kolom pencarian langsung di bagian atas daftar untuk menyaring ribuan data secara instan. UI dibuat ringkas, responsif, dan menghilangkan pergeseran tata letak (layout shift).
+
+---
+
 <div align="center">
 
 <img src="./.github/assets/logo.png" alt="Nekori logo" title="Nekori logo" width="80"/>
@@ -23,7 +54,7 @@ A personal fork of [Tsundoku](https://github.com/tsundoku-otaku/tsundoku), built
 > This is a personal fork, made for my own use. It is not a community project and is not recommended for production
 > use. Expect breaking changes without notice.
 
-> [!NOTE]  
+> [!NOTE]
 > This fork uses AI slop.
 
 ## Download
@@ -45,7 +76,7 @@ what the app does, not what this fork added. For the fork's own changes, see
 
 **Sources**
 
-* LNReader plugins, run by a headless React Native + Hermes runtime, against standard `fetch`.
+* LNReader plugins, run by a headless React Native + Hermes runtime, against stkamurd `fetch`.
 * Plugins share the app's user agent and cookie jar, so logins and Cloudflare clearances carry over.
 * Install, update and remove plugins from repositories, with plugin details and install state.
 * Local reading of content, including EPUB, TXT and HTML.

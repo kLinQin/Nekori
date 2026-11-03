@@ -2,46 +2,55 @@ package eu.kanade.tachiyomi.ui.reader.replace
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.KeyboardArrowUp
-import androidx.compose.material.icons.outlined.KeyboardArrowDown
+import androidx.compose.material.icons.outlined.ArrowDropDown
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Code
+import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.DragHandle
 import androidx.compose.material.icons.outlined.DriveFileRenameOutline
+import androidx.compose.material.icons.outlined.FileOpen
+import androidx.compose.material.icons.outlined.FindReplace
+import androidx.compose.material.icons.outlined.FormatColorFill
+import androidx.compose.material.icons.outlined.KeyboardArrowDown
+import androidx.compose.material.icons.outlined.KeyboardArrowUp
+import androidx.compose.material.icons.outlined.Palette
+import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.Save
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -49,22 +58,24 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import eu.kanade.presentation.components.AdaptiveSheet
+import eu.kanade.presentation.components.TabTitle
+import eu.kanade.presentation.components.TabbedDialogContent
+import eu.kanade.presentation.components.TabbedDialogPaddings
 import eu.kanade.tachiyomi.data.replace.ReplaceColors
 import eu.kanade.tachiyomi.data.replace.ReplaceFindEntry
 import eu.kanade.tachiyomi.data.replace.ReplaceHighlightEntry
 import eu.kanade.tachiyomi.data.replace.ReplaceHighlightType
-import eu.kanade.tachiyomi.data.replace.ReplaceProfile
 import eu.kanade.tachiyomi.data.replace.ReplaceStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import sh.calvin.reorderable.ReorderableItem
-import sh.calvin.reorderable.rememberReorderableLazyListState
 
 private val HEX_REGEX = Regex("^#[0-9a-fA-F]{6}$")
 
@@ -77,44 +88,37 @@ fun ReplaceDrawerSheet(
     onDismissRequest: () -> Unit,
     onExportJson: (String) -> Unit,
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var activeTab by remember { mutableIntStateOf(0) }
-    val tabs = listOf("F&R", "Highlight", "Colors", "JSON")
+    val tabTitles = listOf(
+        TabTitle.Icon(Icons.Outlined.FindReplace),
+        TabTitle.Icon(Icons.Outlined.FormatColorFill),
+        TabTitle.Icon(Icons.Outlined.Palette),
+        TabTitle.Icon(Icons.Outlined.Code),
+    )
+    val pagerState = rememberPagerState { tabTitles.size }
 
-    ModalBottomSheet(
-        onDismissRequest = onDismissRequest,
-        sheetState = sheetState,
-    ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            TabRow(selectedTabIndex = activeTab) {
-                tabs.forEachIndexed { index, title ->
-                    Tab(
-                        selected = activeTab == index,
-                        onClick = { activeTab = index },
-                        text = { Text(title) },
-                    )
+    BoxWithConstraints {
+        AdaptiveSheet(
+            onDismissRequest = onDismissRequest,
+            modifier = Modifier.heightIn(max = maxHeight * 0.85f),
+        ) {
+            TabbedDialogContent(tabTitles = tabTitles, pagerState = pagerState) { page ->
+                Column(
+                    modifier = Modifier
+                        .height(maxHeight * 0.6f)
+                        .padding(vertical = TabbedDialogPaddings.Vertical),
+                ) {
+                    when (page) {
+                        0 -> FindReplaceTab(store, viewModel)
+                        1 -> HighlightTab(store, viewModel)
+                        2 -> ColorsTab(colors, viewModel)
+                        3 -> JsonTab(store, colors, viewModel, onExportJson)
+                    }
                 }
             }
-
-            Spacer(Modifier.height(8.dp))
-
-            androidx.compose.foundation.layout.Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(480.dp),
-            ) {
-                when (activeTab) {
-                    0 -> FindReplaceTab(store, viewModel)
-                    1 -> HighlightTab(store, viewModel)
-                    2 -> ColorsTab(colors, viewModel)
-                    3 -> JsonTab(store, colors, viewModel, onExportJson)
-                }
-            }
-
-            Spacer(Modifier.height(24.dp))
         }
     }
 }
+
 @Composable
 private fun ProfileBar(
     store: ReplaceStore,
@@ -130,55 +134,57 @@ private fun ProfileBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 16.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        Text("Profile:", style = MaterialTheme.typography.labelLarge)
-        Surface(
-            onClick = { menuExpanded = true },
-            shape = MaterialTheme.shapes.small,
-            tonalElevation = 2.dp,
-        ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
+        Text("Profile", style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
+        Box {
+            TextButton(onClick = { menuExpanded = true }) {
                 Text(store.active, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text(" ▾")
+                Icon(Icons.Outlined.ArrowDropDown, contentDescription = null)
             }
-        }
-        DropdownMenu(
-            expanded = menuExpanded,
-            onDismissRequest = { menuExpanded = false },
-        ) {
-            names.forEach { name ->
+            DropdownMenu(
+                expanded = menuExpanded,
+                onDismissRequest = { menuExpanded = false },
+            ) {
+                names.forEach { name ->
+                    DropdownMenuItem(
+                        text = { Text(name) },
+                        onClick = {
+                            viewModel.setActiveProfile(name)
+                            menuExpanded = false
+                        },
+                    )
+                }
+                HorizontalDivider()
                 DropdownMenuItem(
-                    text = { Text(name) },
+                    text = { Text("Tambah profile") },
+                    leadingIcon = { Icon(Icons.Outlined.Add, contentDescription = null) },
                     onClick = {
-                        viewModel.setActiveProfile(name)
+                        nameInput = ""
+                        showAddDialog = true
+                        menuExpanded = false
+                    },
+                )
+                DropdownMenuItem(
+                    text = { Text("Rename profile") },
+                    leadingIcon = { Icon(Icons.Outlined.DriveFileRenameOutline, contentDescription = null) },
+                    onClick = {
+                        nameInput = store.active
+                        showRenameDialog = true
+                        menuExpanded = false
+                    },
+                )
+                DropdownMenuItem(
+                    text = { Text("Hapus profile") },
+                    leadingIcon = { Icon(Icons.Outlined.Delete, contentDescription = null) },
+                    enabled = names.size > 1,
+                    onClick = {
+                        viewModel.deleteProfile(store.active)
                         menuExpanded = false
                     },
                 )
             }
-        }
-        IconButton(onClick = {
-            nameInput = ""
-            showAddDialog = true
-        }) {
-            Icon(Icons.Outlined.Add, contentDescription = "Tambah profile")
-        }
-        IconButton(onClick = {
-            nameInput = store.active
-            showRenameDialog = true
-        }) {
-            Icon(Icons.Outlined.DriveFileRenameOutline, contentDescription = "Rename profile")
-        }
-        IconButton(
-            onClick = { viewModel.deleteProfile(store.active) },
-            enabled = names.size > 1,
-        ) {
-            Icon(Icons.Outlined.Delete, contentDescription = "Hapus profile")
         }
     }
 
@@ -214,7 +220,7 @@ private fun TextInputDialog(
     onConfirm: (String) -> Unit,
 ) {
     var value by remember { mutableStateOf(initial) }
-    androidx.compose.material3.AlertDialog(
+    AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = {
@@ -252,15 +258,23 @@ private fun FindReplaceTab(
     var selectedType by remember { mutableStateOf<ReplaceHighlightType?>(null) }
     var searchQuery by remember { mutableStateOf("") }
 
-    val filtered = remember(items.toList(), searchQuery) {
-        if (searchQuery.isBlank()) items.toList()
-        else items.filter {
-            it.find.contains(searchQuery, ignoreCase = true) ||
-                it.replace.contains(searchQuery, ignoreCase = true)
+    val filteredWithIndex = remember(items.toList(), searchQuery) {
+        if (searchQuery.isBlank()) {
+            items.mapIndexed { index, entry -> index to entry }
+        } else {
+            items.mapIndexedNotNull { index, entry ->
+                if (entry.find.contains(searchQuery, ignoreCase = true) ||
+                    entry.replace.contains(searchQuery, ignoreCase = true)
+                ) {
+                    index to entry
+                } else {
+                    null
+                }
+            }
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
         ProfileBar(store, viewModel)
 
         Column(
@@ -269,12 +283,6 @@ private fun FindReplaceTab(
                 .padding(horizontal = 12.dp, vertical = 6.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            CompactField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                placeholder = "cari...",
-                modifier = Modifier.fillMaxWidth(),
-            )
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -292,6 +300,12 @@ private fun FindReplaceTab(
                     modifier = Modifier.weight(1f),
                 )
             }
+            CompactField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                placeholder = "cari...",
+                modifier = Modifier.fillMaxWidth(),
+            )
             Row(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -323,8 +337,7 @@ private fun FindReplaceTab(
                 .fillMaxWidth()
                 .weight(1f),
         ) {
-            itemsIndexed(filtered) { filteredIndex, entry ->
-                val realIndex = items.indexOf(entry)
+            items(filteredWithIndex, key = { it.second.id }) { (realIndex, entry) ->
                 CompactFindRow(
                     entry = entry,
                     canMoveUp = realIndex > 0,
@@ -372,12 +385,21 @@ private fun HighlightTab(
     var selectedType by remember { mutableStateOf(ReplaceHighlightType.CHAR) }
     var searchQuery by remember { mutableStateOf("") }
 
-    val filtered = remember(items.toList(), searchQuery) {
-        if (searchQuery.isBlank()) items.toList()
-        else items.filter { it.text.contains(searchQuery, ignoreCase = true) }
+    val filteredWithIndex = remember(items.toList(), searchQuery) {
+        if (searchQuery.isBlank()) {
+            items.mapIndexed { index, entry -> index to entry }
+        } else {
+            items.mapIndexedNotNull { index, entry ->
+                if (entry.text.contains(searchQuery, ignoreCase = true)) {
+                    index to entry
+                } else {
+                    null
+                }
+            }
+        }
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
         ProfileBar(store, viewModel)
 
         Column(
@@ -387,15 +409,15 @@ private fun HighlightTab(
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             CompactField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                placeholder = "cari...",
-                modifier = Modifier.fillMaxWidth(),
-            )
-            CompactField(
                 value = textInput,
                 onValueChange = { textInput = it },
                 placeholder = "teks untuk di-highlight",
+                modifier = Modifier.fillMaxWidth(),
+            )
+            CompactField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                placeholder = "cari...",
                 modifier = Modifier.fillMaxWidth(),
             )
             Row(
@@ -423,8 +445,7 @@ private fun HighlightTab(
                 .fillMaxWidth()
                 .weight(1f),
         ) {
-            itemsIndexed(filtered) { filteredIndex, entry ->
-                val realIndex = items.indexOf(entry)
+            items(filteredWithIndex, key = { it.second.id }) { (realIndex, entry) ->
                 CompactHighlightRow(
                     entry = entry,
                     canMoveUp = realIndex > 0,
@@ -465,18 +486,11 @@ private fun TypeChip(
     selected: Boolean,
     onClick: () -> Unit,
 ) {
-    Surface(
+    FilterChip(
+        selected = selected,
         onClick = onClick,
-        shape = MaterialTheme.shapes.extraSmall,
-        color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-    ) {
-        Text(
-            text = label,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-            color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-            style = MaterialTheme.typography.labelSmall,
-        )
-    }
+        label = { Text(label) },
+    )
 }
 
 @Composable
@@ -486,33 +500,14 @@ private fun CompactField(
     placeholder: String,
     modifier: Modifier = Modifier,
 ) {
-    Surface(
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        placeholder = { Text(placeholder) },
+        singleLine = true,
+        textStyle = MaterialTheme.typography.bodyMedium,
         modifier = modifier,
-        shape = MaterialTheme.shapes.small,
-        color = MaterialTheme.colorScheme.surfaceVariant,
-    ) {
-        BasicTextField(
-            value = value,
-            onValueChange = onValueChange,
-            singleLine = true,
-            textStyle = MaterialTheme.typography.bodySmall.copy(
-                color = MaterialTheme.colorScheme.onSurface,
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 6.dp),
-            decorationBox = { inner ->
-                if (value.isEmpty()) {
-                    Text(
-                        text = placeholder,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                inner()
-            },
-        )
-    }
+    )
 }
 
 @Composable
@@ -541,7 +536,7 @@ private fun CompactFindRow(
                 Icon(Icons.Outlined.KeyboardArrowDown, contentDescription = "Turun", modifier = Modifier.size(16.dp))
             }
         }
-        androidx.compose.material3.Checkbox(
+        Checkbox(
             checked = entry.enabled,
             onCheckedChange = onToggle,
             modifier = Modifier.size(32.dp),
@@ -592,7 +587,7 @@ private fun CompactHighlightRow(
                     Icon(Icons.Outlined.KeyboardArrowDown, contentDescription = "Turun", modifier = Modifier.size(16.dp))
                 }
             }
-            androidx.compose.material3.Checkbox(
+            Checkbox(
                 checked = entry.enabled,
                 onCheckedChange = onToggle,
                 modifier = Modifier.size(32.dp),
@@ -803,37 +798,59 @@ private fun JsonTab(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .fillMaxHeight()
+            .padding(horizontal = 16.dp, vertical = 6.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Row(
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            TextButton(onClick = {
-                textValue = json.encodeToString(ReplaceStore.serializer(), store)
-                message = ""
-            }) { Text("Refresh") }
-            TextButton(onClick = {
-                importLauncher.launch(arrayOf("application/json", "text/plain", "*/*"))
-            }) { Text("Import file") }
-            TextButton(onClick = {
-                runCatching {
-                    val newStore = json.decodeFromString(ReplaceStore.serializer(), textValue)
-                    viewModel.replaceStore(newStore)
-                    message = "Import OK (overwrite)"
-                }.onFailure { e ->
-                    message = "Import gagal: ${e.message ?: "format salah"}"
-                }
-            }) { Text("Import (overwrite)") }
-            TextButton(onClick = {
-                val payload = json.encodeToString(ReplaceStore.serializer(), store)
-                onExportJson(payload)
-                message = "Export dikirim (clipboard)"
-            }) { Text("Export (copy)") }
-            TextButton(onClick = {
-                exportLauncher.launch("nekori-replace.json")
-            }) { Text("Export file") }
+            JsonAction(
+                icon = Icons.Outlined.Refresh,
+                label = "Refresh",
+                onClick = {
+                    textValue = json.encodeToString(ReplaceStore.serializer(), store)
+                    message = ""
+                },
+            )
+            JsonAction(
+                icon = Icons.Outlined.FileOpen,
+                label = "Import",
+                onClick = {
+                    importLauncher.launch(arrayOf("application/json", "text/plain", "*/*"))
+                },
+            )
+            JsonAction(
+                icon = Icons.Outlined.CheckCircle,
+                label = "Apply",
+                onClick = {
+                    runCatching {
+                        val newStore = json.decodeFromString(ReplaceStore.serializer(), textValue)
+                        viewModel.replaceStore(newStore)
+                        message = "Import OK (overwrite)"
+                    }.onFailure { e ->
+                        message = "Import gagal: ${e.message ?: "format salah"}"
+                    }
+                },
+            )
+            JsonAction(
+                icon = Icons.Outlined.ContentCopy,
+                label = "Copy",
+                onClick = {
+                    val payload = json.encodeToString(ReplaceStore.serializer(), store)
+                    onExportJson(payload)
+                    message = "Export dikirim (clipboard)"
+                },
+            )
+            JsonAction(
+                icon = Icons.Outlined.Save,
+                label = "Save",
+                onClick = {
+                    exportLauncher.launch("nekori-replace.json")
+                },
+            )
         }
 
         OutlinedTextField(
@@ -841,8 +858,8 @@ private fun JsonTab(
             onValueChange = { textValue = it },
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(min = 200.dp, max = 400.dp),
-            textStyle = MaterialTheme.typography.bodySmall.copy(
+                .weight(1f),
+            textStyle = MaterialTheme.typography.bodyMedium.copy(
                 fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
             ),
         )
@@ -854,5 +871,23 @@ private fun JsonTab(
                 color = MaterialTheme.colorScheme.error,
             )
         }
+    }
+}
+
+@Composable
+private fun JsonAction(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    onClick: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .clip(MaterialTheme.shapes.small)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 6.dp, vertical = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Icon(icon, contentDescription = label, modifier = Modifier.size(20.dp))
+        Text(label, style = MaterialTheme.typography.labelSmall)
     }
 }

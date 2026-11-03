@@ -6,25 +6,27 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import eu.kanade.tachiyomi.data.replace.ReplaceHighlightType
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 fun ReplaceQuickAddSheet(
     mode: ReplaceQuickAddMode,
     initialFind: String,
@@ -32,23 +34,26 @@ fun ReplaceQuickAddSheet(
     viewModel: ReplaceViewModel,
     onDismissRequest: () -> Unit,
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var findText by remember { mutableStateOf(initialFind) }
     var replaceText by remember { mutableStateOf(initialReplace) }
     var selectedType by remember {
         mutableStateOf<ReplaceHighlightType?>(if (mode == ReplaceQuickAddMode.HIGHLIGHT) ReplaceHighlightType.CHAR else null)
     }
 
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val scope = rememberCoroutineScope()
+
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
             Text(
                 text = if (mode == ReplaceQuickAddMode.FIND_REPLACE) "Find & Replace" else "Highlight",
                 style = MaterialTheme.typography.titleMedium,
@@ -107,7 +112,10 @@ fun ReplaceQuickAddSheet(
                             viewModel.addHighlightEntry(find, selectedType ?: ReplaceHighlightType.CHAR)
                         }
                     }
-                    onDismissRequest()
+                        scope.launch {
+                            sheetState.hide()
+                            onDismissRequest()
+                        }
                 }) { Text("Add") }
             }
         }

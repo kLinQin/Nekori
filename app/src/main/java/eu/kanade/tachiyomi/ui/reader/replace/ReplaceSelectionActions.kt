@@ -9,6 +9,7 @@ import androidx.compose.material.icons.outlined.FindReplace
 import androidx.compose.material.icons.outlined.FormatColorFill
 import androidx.compose.material.icons.outlined.Translate
 import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -43,6 +44,9 @@ private fun ActionButton(
 ) {
     FilledTonalIconButton(
         onClick = onClick,
+        colors = IconButtonDefaults.filledTonalIconButtonColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        ),
         modifier = Modifier.size(44.dp),
     ) {
         Icon(icon, contentDescription = contentDescription)

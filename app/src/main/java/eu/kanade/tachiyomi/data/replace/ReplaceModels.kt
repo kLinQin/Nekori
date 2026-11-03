@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.data.replace
 
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Transient
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -26,6 +27,7 @@ data class ReplaceFindEntry(
     val find: String = "",
     val replace: String = "",
     val enabled: Boolean = true,
+    @Transient val id: String = java.util.UUID.randomUUID().toString(),
 )
 
 @Serializable
@@ -33,6 +35,7 @@ data class ReplaceHighlightEntry(
     val text: String = "",
     val type: ReplaceHighlightType = ReplaceHighlightType.CHAR,
     val enabled: Boolean = true,
+    @Transient val id: String = java.util.UUID.randomUUID().toString(),
 )
 
 @Serializable

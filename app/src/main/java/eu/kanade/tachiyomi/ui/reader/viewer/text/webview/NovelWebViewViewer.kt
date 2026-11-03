@@ -3615,6 +3615,10 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
         executeReaderCommand(NovelWebViewReadingCommands.clearSelection())
     }
 
+    fun clearReplaceSelection() {
+        _replaceSelection.value = ""
+    }
+
     /**
      * Handle the "Remember" action from text selection menu
      */
