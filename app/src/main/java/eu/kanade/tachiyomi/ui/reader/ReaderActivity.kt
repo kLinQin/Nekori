@@ -158,7 +158,10 @@ import uy.kohesive.injekt.api.get
 import java.io.ByteArrayOutputStream
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.seconds
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.offset
 import androidx.compose.ui.graphics.Color as ComposeColor
+import androidx.compose.ui.graphics.toArgb
 
 class ReaderActivity : BaseActivity() {
 
@@ -651,6 +654,24 @@ class ReaderActivity : BaseActivity() {
                 updateViewerInset(readerPreferences.fullscreen.get(), readerPreferences.drawUnderCutout.get())
             }
 
+            val borderColor = androidx.compose.material3.MaterialTheme.colorScheme.outlineVariant
+            LaunchedEffect(borderColor) {
+                binding.readerBorder.setBorderColorFromTheme(borderColor.toArgb())
+            }
+
+            // Border bawah jangan tertutup status bar reader (posisi bawah, bukan custom background).
+            // Draw-only: tidak mengubah layout / tinggi WebView, jadi tidak memicu loop status bar.
+            LaunchedEffect(isNovelViewer, novelStatusBarEnabled, statusBarAtBottomEdge, customBackground, statusBarHeightPx) {
+                val borderExtraBottom = if (
+                    isNovelViewer && novelStatusBarEnabled && statusBarAtBottomEdge && !customBackground
+                ) {
+                    statusBarHeightPx
+                } else {
+                    0
+                }
+                binding.readerBorder.setExtraBottomInset(borderExtraBottom)
+            }
+
             NovelChapterDrawer(
                 drawerState = chapterDrawerState,
                 snapshot = chapterDrawerSnapshot,
@@ -741,6 +762,12 @@ class ReaderActivity : BaseActivity() {
                                     } else {
                                         Modifier.statusBarsPadding()
                                     },
+                                )
+                                .padding(horizontal = 8.dp)
+                                .border(
+                                    width = 1.dp,
+                                    color = androidx.compose.material3.MaterialTheme.colorScheme.outlineVariant,
+                                    shape = androidx.compose.foundation.shape.RoundedCornerShape(2.dp),
                                 ),
                         )
                     }
@@ -1373,9 +1400,10 @@ class ReaderActivity : BaseActivity() {
                 ) {
                     androidx.compose.material3.FilledTonalIconButton(
                         onClick = { viewModel.toggleTranslation() },
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(10.dp),
                         modifier = Modifier
                             .align(androidx.compose.ui.Alignment.CenterEnd)
-                            .padding(end = 8.dp),
+                            .padding(end = 12.dp),
                     ) {
                         androidx.compose.material3.Icon(
                             Icons.Outlined.Translate,
@@ -1390,7 +1418,9 @@ class ReaderActivity : BaseActivity() {
                     modifier = Modifier.fillMaxSize(),
                 ) {
                     ReplaceSelectionActions(
-                        modifier = Modifier.align(androidx.compose.ui.Alignment.CenterEnd),
+                        modifier = Modifier
+                            .align(androidx.compose.ui.Alignment.CenterEnd)
+                            .padding(end = 12.dp),
                     onFindReplace = {
                         replaceQuickAddMode = ReplaceQuickAddMode.FIND_REPLACE
                         replaceQuickAddFind = replaceSelection
