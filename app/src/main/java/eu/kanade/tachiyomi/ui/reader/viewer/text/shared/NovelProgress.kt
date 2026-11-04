@@ -9,6 +9,15 @@ import kotlin.math.roundToInt
  */
 object NovelProgress {
 
+    // TODO: Decide when genuine reading after a search jump should restore the configured threshold.
+    // At a 95% threshold, searching to 96% then reading to 97% stays unread until real completion.
+    // This guard applies only to the searched chapter; the next chapter uses the normal threshold.
+    fun shouldMarkRead(percent: Int, threshold: Int, searchJump: Boolean, reachedEnd: Boolean): Boolean =
+        if (searchJump) reachedEnd else percent >= threshold
+
+    fun hasReadingEndProof(atEnd: Boolean, manualInteraction: Boolean, ttsPlaying: Boolean): Boolean =
+        atEnd && manualInteraction && !ttsPlaying
+
     /**
      * Scroll ratio at/above which a chapter counts as fully read. Shared by every renderer and by
      * the scroll-tracking JS so a chapter marks read at the same point regardless of viewer.
