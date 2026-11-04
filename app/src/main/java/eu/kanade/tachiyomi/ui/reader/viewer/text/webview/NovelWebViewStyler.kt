@@ -277,6 +277,7 @@ internal class NovelWebViewStyler(
                 buildJsonObject {
                     put("bionicEnabled", preferences.novelBionicReading.get())
                     put("ttsEnabled", preferences.novelTtsEnabled.get())
+                    put("findReplaceEnabled", preferences.novelFindReplaceEnabled.get())
                     put(
                         "labels",
                         buildJsonObject {

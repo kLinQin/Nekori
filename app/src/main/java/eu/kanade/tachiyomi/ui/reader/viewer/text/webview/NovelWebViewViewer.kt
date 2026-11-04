@@ -2383,6 +2383,7 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
                 buildJsonObject {
                     put("bionicEnabled", mode == "reader" && preferences.novelBionicReading.get())
                     put("ttsEnabled", mode == "reader" && isTtsEnabled)
+                    put("findReplaceEnabled", mode == "reader" && preferences.novelFindReplaceEnabled.get())
                     put(
                         "labels",
                         buildJsonObject {

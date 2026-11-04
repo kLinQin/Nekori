@@ -408,6 +408,12 @@
 
     <string name="pref_novel_infinite_scroll">Cuộn vô hạn (tự tải chương kế tiếp)</string>
     <string name="pref_novel_progress_slider">Hiện thanh trượt tiến độ</string>
+        <string name="pref_novel_find_replace">Tìm &amp; Thay thế</string>
+    <string name="pref_novel_translate_floating">Nút dịch nổi</string>
+    <string name="pref_novel_translate_floating_summary">Hiển thị nút dịch nổi bên phải, ẩn khỏi thanh dưới</string>
+    <string name="pref_novel_find_replace_summary">Bật tính năng tìm &amp; thay thế, highlight, dịch và thao tác bôi đen</string>
+    <string name="pref_novel_find_replace_note_upper">Hanya menerapkan aturan regex penggantian SETELAH diterjemahkan. Tidak mempengaruhi UI find &amp; replace.</string>
+    <string name="pref_novel_find_replace_note_lower">Mengaktifkan/menonaktifkan tombol find &amp; replace, highlight, popup terjemahan, dan aksi seleksi teks di reader.</string>
     <string name="pref_novel_allow_lonely_lines">Cho phép dòng lẻ</string>
     <string name="pref_novel_allow_lonely_lines_summary">Cho phép một dòng của đoạn văn nằm riêng ở đầu hoặc cuối trang để giảm khoảng trống</string>
     <string name="pref_novel_page_spread">Số trang hiển thị</string>

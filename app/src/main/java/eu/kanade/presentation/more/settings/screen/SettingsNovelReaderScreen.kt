@@ -275,6 +275,13 @@ object SettingsNovelReaderScreen : SearchableSettings {
                     )
                 }
                 add(
+                    Preference.PreferenceItem.SwitchPreference(
+                        preference = readerPreferences.novelFindReplaceEnabled,
+                        title = stringResource(TDMR.strings.pref_novel_find_replace),
+                        subtitle = stringResource(TDMR.strings.pref_novel_find_replace_summary),
+                    ),
+                )
+                add(
                     Preference.PreferenceItem.ListPreference(
                         preference = readerPreferences.defaultOrientationType,
                         entries = ReaderOrientation.entries.filter { it != ReaderOrientation.DEFAULT }

@@ -54,6 +54,16 @@ class ReaderPreferences(
 
     val autoTranslate: Preference<Boolean> = preferenceStore.getBoolean("pref_auto_translate", false)
 
+    val novelFindReplaceEnabled: Preference<Boolean> = preferenceStore.getBoolean(
+        "pref_novel_find_replace_enabled",
+        false,
+    )
+
+    val novelTranslateFloating: Preference<Boolean> = preferenceStore.getBoolean(
+        "pref_novel_translate_floating",
+        false,
+    )
+
     val novelReadTracking: Preference<Boolean> = preferenceStore.getBoolean("pref_novel_read_tracking", true)
 
     val novelReadTrackingMinDuration: Preference<Int> = preferenceStore.getInt(

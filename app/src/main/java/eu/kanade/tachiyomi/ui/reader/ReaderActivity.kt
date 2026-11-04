@@ -1,5 +1,9 @@
 package eu.kanade.tachiyomi.ui.reader
 
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Translate
+
 import android.annotation.SuppressLint
 import android.app.assist.AssistContent
 import android.content.BroadcastReceiver
@@ -1177,6 +1181,14 @@ class ReaderActivity : BaseActivity() {
             }
 
             val bottomBarItems by viewModel.bottomBarItems.collectAsState()
+            val findReplaceEnabled by viewModel.readerPreferences.novelFindReplaceEnabled.collectAsState()
+            val translateFloating by viewModel.readerPreferences.novelTranslateFloating.collectAsState()
+            val gatedBottomBarItems = remember(findReplaceEnabled, translateFloating, bottomBarItems) {
+                bottomBarItems.filter {
+                    (findReplaceEnabled || it.item != eu.kanade.presentation.reader.appbars.BottomBarItem.REPLACE_HIGHLIGHT) &&
+                        (!translateFloating || it.item != eu.kanade.presentation.reader.appbars.BottomBarItem.TRANSLATE)
+                }
+            }
             var showBottomBarEditor by remember { mutableStateOf(false) }
             var showEditSaveDialog by remember { mutableStateOf(false) }
             var isEditing by remember { mutableStateOf(false) }
@@ -1349,13 +1361,31 @@ class ReaderActivity : BaseActivity() {
                 },
 
                 isWebView = true,
-                bottomBarItems = bottomBarItems,
+                bottomBarItems = gatedBottomBarItems,
                 onQuotes = ::onQuotesClicked,
                 onReplaceHighlight = { showReplaceDrawer = true },
                 ttsOverlayBottomPadding = ttsOverlayBottomPadding,
             )
 
-            if (replaceSelection.isNotBlank()) {
+            if (translateFloating && replaceSelection.isBlank() && !state.isTranslating) {
+                androidx.compose.foundation.layout.Box(
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    androidx.compose.material3.FilledTonalIconButton(
+                        onClick = { viewModel.toggleTranslation() },
+                        modifier = Modifier
+                            .align(androidx.compose.ui.Alignment.CenterEnd)
+                            .padding(8.dp),
+                    ) {
+                        androidx.compose.material3.Icon(
+                            Icons.Outlined.Translate,
+                            contentDescription = "Translate",
+                        )
+                    }
+                }
+            }
+
+            if (findReplaceEnabled && replaceSelection.isNotBlank()) {
                 androidx.compose.foundation.layout.Box(
                     modifier = Modifier.fillMaxSize(),
                 ) {
@@ -1376,11 +1406,13 @@ class ReaderActivity : BaseActivity() {
                 }
             }
 
-            translatedSelection?.let { pair ->
-                (state.viewer as? NovelWebViewViewer)?.consumeTranslatedSelection()
-                replaceQuickAddMode = ReplaceQuickAddMode.FIND_REPLACE
-                replaceQuickAddFind = pair.first
-                replaceQuickAddReplace = pair.second
+            if (findReplaceEnabled) {
+                translatedSelection?.let { pair ->
+                    (state.viewer as? NovelWebViewViewer)?.consumeTranslatedSelection()
+                    replaceQuickAddMode = ReplaceQuickAddMode.FIND_REPLACE
+                    replaceQuickAddFind = pair.first
+                    replaceQuickAddReplace = pair.second
+                }
             }
 
             replaceQuickAddMode?.let { mode ->
@@ -1396,7 +1428,7 @@ class ReaderActivity : BaseActivity() {
                 )
             }
 
-            if (showReplaceDrawer) {
+            if (findReplaceEnabled && showReplaceDrawer) {
                 ReplaceDrawerSheet(
                     store = replaceStore,
                     colors = replaceColors,
