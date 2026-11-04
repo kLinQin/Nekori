@@ -6,17 +6,25 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Surface
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -26,6 +34,8 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
@@ -127,12 +137,18 @@ object HomeScreen : Screen() {
                             }
                         }
                     },
-                    contentWindowInsets = WindowInsets(0),
+                    contentWindowInsets = WindowInsets.systemBars,
                 ) { contentPadding ->
-                    Box(
+                    Surface(
+                        shape = RoundedCornerShape(2.dp),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                        shadowElevation = 0.dp,
+                        tonalElevation = 0.dp,
+                        color = MaterialTheme.colorScheme.surface,
                         modifier = Modifier
                             .padding(contentPadding)
-                            .consumeWindowInsets(contentPadding),
+                            .consumeWindowInsets(contentPadding)
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
                     ) {
                         AnimatedContent(
                             targetState = tabNavigator.current,
@@ -193,9 +209,11 @@ object HomeScreen : Screen() {
         val tabNavigator = LocalTabNavigator.current
         val navigator = LocalNavigator.currentOrThrow
         val scope = rememberCoroutineScope()
+        val interactionSource = remember { MutableInteractionSource() }
         val selected = tabNavigator.current::class == tab::class
         NavigationBarItem(
             selected = selected,
+            interactionSource = interactionSource,
             onClick = {
                 if (!selected) {
                     tabNavigator.current = tab
@@ -212,6 +230,7 @@ object HomeScreen : Screen() {
                     overflow = TextOverflow.Ellipsis,
                 )
             },
+            colors = NavigationBarItemDefaults.colors(indicatorColor = Color.Transparent),
             alwaysShowLabel = true,
         )
     }
@@ -221,9 +240,11 @@ object HomeScreen : Screen() {
         val tabNavigator = LocalTabNavigator.current
         val navigator = LocalNavigator.currentOrThrow
         val scope = rememberCoroutineScope()
+        val interactionSource = remember { MutableInteractionSource() }
         val selected = tabNavigator.current::class == tab::class
         NavigationRailItem(
             selected = selected,
+            interactionSource = interactionSource,
             onClick = {
                 if (!selected) {
                     tabNavigator.current = tab
@@ -240,6 +261,7 @@ object HomeScreen : Screen() {
                     overflow = TextOverflow.Ellipsis,
                 )
             },
+            colors = NavigationRailItemDefaults.colors(indicatorColor = Color.Transparent),
             alwaysShowLabel = true,
         )
     }
