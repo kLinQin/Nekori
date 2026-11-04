@@ -742,8 +742,10 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
                             }
                             return callback.onActionItemClicked(mode, item)
                         }
-                        override fun onDestroyActionMode(mode: ActionMode) =
+                        override fun onDestroyActionMode(mode: ActionMode) {
                             callback.onDestroyActionMode(mode)
+                            captureSelectionClipboard()
+                        }
 
                         // Forward the content rect so the toolbar floats near the selection
                         override fun onGetContentRect(mode: ActionMode, view: View, outRect: android.graphics.Rect) =
@@ -773,8 +775,10 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
                             }
                             return callback.onActionItemClicked(mode, item)
                         }
-                        override fun onDestroyActionMode(mode: ActionMode) =
+                        override fun onDestroyActionMode(mode: ActionMode) {
                             callback.onDestroyActionMode(mode)
+                            captureSelectionClipboard()
+                        }
                     }
                 }
                 return super.startActionMode(wrapped, type)
@@ -1435,7 +1439,25 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
         if (activity.viewModel.reloadChapter(fromSource = shouldRetryFromSource(page))) showLoadingIndicator()
     }
 
+    private fun captureSelectionClipboard() {
+        try {
+            val cm = activity.getSystemService(android.content.ClipboardManager::class.java) ?: return
+            val clip = cm.primaryClip ?: return
+            if (clip.itemCount == 0) return
+            val text = clip.getItemAt(0).coerceToText(activity)?.toString()?.trim().orEmpty()
+            if (text.isNotEmpty() && text.length <= 500) {
+                eu.kanade.tachiyomi.ui.reader.replace.ReplaceHistory.push(text)
+            }
+        } catch (_: Throwable) {
+            // ignore
+        }
+    }
+
     private fun copyToClipboard(text: String) {
+        android.util.Log.d("NekoriCopy", "copyToClipboard called: len=" + text.length + " text=" + text)
+        if (text.isNotBlank()) {
+            eu.kanade.tachiyomi.ui.reader.replace.ReplaceHistory.push(text)
+        }
         val cm = activity.getSystemService(android.content.ClipboardManager::class.java)
         cm.setPrimaryClip(android.content.ClipData.newPlainText("error", text))
         activity.toast(activity.stringResource(TDMR.strings.novel_error_copied))

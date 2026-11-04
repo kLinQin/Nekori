@@ -6,6 +6,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.ModalBottomSheet
@@ -36,6 +44,7 @@ fun ReplaceQuickAddSheet(
 ) {
     var findText by remember { mutableStateOf(initialFind) }
     var replaceText by remember { mutableStateOf(initialReplace) }
+    val history = ReplaceHistory.snapshot()
     var selectedType by remember {
         mutableStateOf<ReplaceHighlightType?>(if (mode == ReplaceQuickAddMode.HIGHLIGHT) ReplaceHighlightType.CHAR else null)
     }
@@ -75,6 +84,23 @@ fun ReplaceQuickAddSheet(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
+
+                if (history.isNotEmpty()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        history.forEach { item ->
+                            AssistChip(
+                                onClick = { replaceText = item },
+                                label = { Text(item, maxLines = 1) },
+                                colors = AssistChipDefaults.assistChipColors(),
+                            )
+                        }
+                    }
+                }
             }
 
             Row(
@@ -103,6 +129,7 @@ fun ReplaceQuickAddSheet(
                     when (mode) {
                         ReplaceQuickAddMode.FIND_REPLACE -> {
                             viewModel.addFindEntry(find, replaceText)
+
                             val type = selectedType
                             if (type != null && replaceText.isNotBlank()) {
                                 viewModel.addHighlightEntry(replaceText, type)
