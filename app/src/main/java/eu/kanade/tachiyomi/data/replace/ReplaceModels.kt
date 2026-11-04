@@ -88,5 +88,22 @@ data class ReplaceColors(
 ) {
     companion object {
         fun default(): ReplaceColors = ReplaceColors()
+
+        data class PalettePreset(
+            val name: String,
+            val char: String,
+            val skill: String,
+            val place: String,
+            val quote: String,
+            val bracket: String,
+        )
+
+        val palettePresets = listOf(
+            PalettePreset("Rose", "#FB7185", "#E879F9", "#5EEAD4", "#FDBA74", "#818CF8"),
+            PalettePreset("Amber", "#FDBA74", "#FBBF24", "#A3E635", "#FDE047", "#C084FC"),
+            PalettePreset("Cool", "#94A3B8", "#60A5FA", "#22D3EE", "#38BDF8", "#818CF8"),
+            PalettePreset("Fresh", "#34D399", "#5EEAD4", "#A3E635", "#4ADE80", "#6EE7B7"),
+            PalettePreset("Warm", "#FB923C", "#FCD34D", "#F472B6", "#FCA5A5", "#FDBA74"),
+        )
     }
 }

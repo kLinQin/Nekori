@@ -3,6 +3,8 @@ package eu.kanade.tachiyomi.ui.reader.replace
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -72,6 +74,8 @@ import eu.kanade.tachiyomi.data.replace.ReplaceFindEntry
 import eu.kanade.tachiyomi.data.replace.ReplaceHighlightEntry
 import eu.kanade.tachiyomi.data.replace.ReplaceHighlightType
 import eu.kanade.tachiyomi.data.replace.ReplaceStore
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.foundation.background
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -627,7 +631,8 @@ private fun ColorsTab(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .verticalScroll(rememberScrollState())
+            .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         ReplaceColorRow(
@@ -693,6 +698,49 @@ private fun ColorsTab(
             },
             onHexChange = { if (HEX_REGEX.matches(it)) viewModel.setColor(ReplaceColorKey.FIND_ACTIVE, it) },
         )
+
+        Spacer(modifier = Modifier.height(12.dp))
+        HorizontalDivider()
+        Spacer(modifier = Modifier.height(8.dp))
+        Text("Palette", style = MaterialTheme.typography.titleSmall)
+        Spacer(modifier = Modifier.height(4.dp))
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            ReplaceColors.palettePresets.forEach { preset ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            viewModel.setColor(ReplaceColorKey.CHAR, preset.char)
+                            viewModel.setColor(ReplaceColorKey.SKILL, preset.skill)
+                            viewModel.setColor(ReplaceColorKey.PLACE, preset.place)
+                            viewModel.setColor(ReplaceColorKey.QUOTE, preset.quote)
+                            viewModel.setColor(ReplaceColorKey.BRACKET, preset.bracket)
+                        }
+                        .padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Text(
+                        preset.name,
+                        style = MaterialTheme.typography.labelMedium,
+                        modifier = Modifier.width(72.dp),
+                    )
+                    val gradientColors = remember(preset) {
+                        listOf(preset.char, preset.skill, preset.place, preset.quote, preset.bracket)
+                            .map { hex -> runCatching { Color(android.graphics.Color.parseColor(hex)) }.getOrDefault(Color.Gray) }
+                    }
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(22.dp)
+                            .background(
+                                Brush.horizontalGradient(gradientColors),
+                                shape = MaterialTheme.shapes.small,
+                            ),
+                    )
+                }
+            }
+        }
     }
 
     val key = pickerKey
@@ -725,14 +773,19 @@ private fun ReplaceColorRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Text(label, modifier = Modifier.weight(1f))
+        Text(
+            label,
+            modifier = Modifier.width(88.dp),
+            style = MaterialTheme.typography.bodyMedium,
+            maxLines = 1,
+        )
         Surface(
             onClick = onSwatchClick,
             color = color,
             shape = MaterialTheme.shapes.small,
             modifier = Modifier
-                .width(48.dp)
-                .height(32.dp),
+                .width(40.dp)
+                .height(28.dp),
         ) {}
         OutlinedTextField(
             value = hexField,
