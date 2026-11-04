@@ -1367,7 +1367,7 @@ class ReaderActivity : BaseActivity() {
                 ttsOverlayBottomPadding = ttsOverlayBottomPadding,
             )
 
-            if (translateFloating && replaceSelection.isBlank() && !state.isTranslating) {
+            if (translateFloating && replaceSelection.isBlank()) {
                 androidx.compose.foundation.layout.Box(
                     modifier = Modifier.fillMaxSize(),
                 ) {
@@ -1375,7 +1375,7 @@ class ReaderActivity : BaseActivity() {
                         onClick = { viewModel.toggleTranslation() },
                         modifier = Modifier
                             .align(androidx.compose.ui.Alignment.CenterEnd)
-                            .padding(8.dp),
+                            .padding(end = 8.dp),
                     ) {
                         androidx.compose.material3.Icon(
                             Icons.Outlined.Translate,
