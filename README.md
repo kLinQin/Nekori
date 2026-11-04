@@ -1,31 +1,25 @@
 > [!WARNING]
-> **PERSONAL EXPERIMENTAL FORK / FORK EKSPERIMENTAL PRIBADI**
+> **PERSONAL EXPERIMENTAL FORK**
 >
-> **🇬🇧 English:**
-> This is my personal fork of [Yuneko-dev/Nekori](https://github.com/Yuneko-dev/Nekori). It contains unreleased, experimental features built for my own use. Expect bugs and breaking changes. For the stable and official version, please use the original repository.
->
-> **🇮🇩 Indonesia:**
-> Ini adalah fork pribadi saya dari [Yuneko-dev/Nekori](https://github.com/Yuneko-dev/Nekori). Repositori ini berisi fitur eksperimental yang belum dirilis dan dibuat untuk penggunaan pribadi. Mungkin terdapat bug atau perubahan yang tidak stabil. Untuk versi stabil dan resmi, silakan gunakan repositori aslinya.
+> Personal fork of [Yuneko-dev/Nekori](https://github.com/Yuneko-dev/Nekori) with unreleased, experimental features. Expect bugs and breaking changes. Use the original repository for the stable version.
 
 ---
 
-### New Features in This Fork / Fitur Baru di Fork Ini
+### New Features in This Fork
 
-**🇬🇧 English:**
-* **Native Find & Replace & Highlight:** Added a fully native Android UI (Jetpack Compose) to manage Find & Replace entries, text highlights, and color themes. Accessible directly from the reader's bottom bar.
-* **Custom HSV Color Picker:** A built-in color picker to easily customize highlight and text colors.
-* **JSON Import & Export:** You can now backup and restore your Find & Replace profiles and color settings directly to a `.json` file using Android's native file picker.
-* **Native Selection Actions:** When you select text in the reader, a floating menu with F (Find), H (Highlight), and T (Translate) icons will appear.
-* **Direct Selection Translation:** Highlight any text and tap the Translate icon. The app will automatically translate the text (ID to EN) and open the Quick-Add form with both the original and translated text pre-filled.
-* **Live Search & Compact UI:** Added a live search bar at the top of the lists to filter through thousands of entries instantly. The UI is compact, responsive, and eliminates layout shifts.
-
-**🇮🇩 Indonesia:**
-* **Find & Replace & Highlight Native:** Menambahkan UI Android native sepenuhnya (Jetpack Compose) untuk mengelola data Find & Replace, highlight teks, dan tema warna. Dapat diakses langsung dari bottom bar reader.
-* **Custom HSV Color Picker:** Pemilih warna bawaan untuk dengan mudah menyesuaikan warna highlight dan teks.
-* **Import & Export JSON:** kamu sekarang dapat mem-backup dan me-restore profil Find & Replace serta pengaturan warna langsung ke file `.json` menggunakan file picker bawaan Android.
-* **Aksi Seleksi Native:** Saat kamu menyorot teks di reader, floating menu dengan ikon F (Find), H (Highlight), dan T (Translate) akan muncul.
-* **Terjemahan Langsung dari Seleksi:** Sorot teks apa pun dan ketuk ikon Translate. Aplikasi akan otomatis menerjemahkan teks (ID ke EN) dan membuka form Quick-Add dengan teks asli dan terjemahan yang sudah terisi.
-* **Pencarian Langsung & UI Ringkas:** Menambahkan kolom pencarian langsung di bagian atas daftar untuk menyaring ribuan data secara instan. UI dibuat ringkas, responsif, dan menghilangkan pergeseran tata letak (layout shift).
+* **Native Find & Replace & Highlight:** Jetpack Compose UI for Find & Replace entries, highlights, and color themes, accessible from the reader's bottom bar.
+* **Custom HSV Color Picker:** Built-in picker for highlight and text colors.
+* **JSON Import & Export:** Backup and restore Find & Replace profiles and color settings to `.json` via the system file picker.
+* **Native Selection Actions:** Selecting text shows F (Find), H (Highlight), and T (Translate) actions.
+* **Direct Selection Translation:** Highlight text and tap Translate to auto-translate (ID → EN) and pre-fill the Quick-Add form.
+* **Live Search & Compact UI:** Live search for large lists, compact layout without layout shifts.
+* **Replace History Auto-Capture:** Copied novel text is auto-added to the Replace history chips (max 10, in-memory).
+* **Color Palette Presets:** Rose, Amber, Cool, Fresh, and Warm palettes with gradient previews for highlight colors.
+* **New App Themes:** Claude (warm earthy) and Sakura (soft pastel pink).
+* **Reader Content Border:** 1dp `outlineVariant` border, 2dp radius, around the chapter area only — consistent with the Library/Updates/History frame.
+* **Reader Status Bar Border & Inset:** Status bar framed and width-matched to the reading area; content border lifts when the bar is at the bottom.
+* **Tap-to-Reveal Original Text:** Tap a Find & Replace result to show the original text inline, copyable with surrounding text; tap again to revert.
+* **Non-Circular Floating Buttons:** Translate FAB and selection action buttons use a 10dp rounded-square shape, inset 4dp from the content border.
 
 ---
 
