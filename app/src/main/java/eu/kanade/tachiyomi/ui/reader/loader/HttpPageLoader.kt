@@ -64,6 +64,8 @@ internal class HttpPageLoader(
 
     override var isLocal: Boolean = false
 
+    override val handlesPageRetries: Boolean = true
+
     /**
      * Returns the page list for a chapter. It tries to return the page list from the local cache,
      * otherwise fallbacks to network.

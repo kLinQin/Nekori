@@ -21,8 +21,25 @@ The format is a modified version of [Keep a Changelog](https://keepachangelog.co
 
 ### Added
 - Add an optional Find and Replace pass on translated chapter text, controlled from the reader and Translation settings [#15](https://github.com/Yuneko-dev/Nekori/issues/15).
+- Add an option to hide infinite-scroll chapter separators, preserving normal paragraph spacing and outer reading margins.
+- Credit Tsundoku and Mihon in the About screen.
+
+### Changed
+- Increase the scrolling speed of app bar subtitles.
+- Move chapter-list scroll actions into the overflow menu and add scrolling to the next unread chapter in the displayed list.
 
 ### Fixed
+- Reuse matching categories when restoring backups, preserve their local settings, and avoid duplicate categories or novel-category links.
+- Keep chapters opened from search results unread until actual completion, including scrolling, TTS and video playback, without forcing completion for ordinary TTS sessions.
+- Reject editing on loading/error documents, retry downloaded chapters locally when possible, and retain replaced reader loaders until their active streams finish.
+- Share chapter loads safely between reader callers and let surviving waiters recover when the load owner is canceled.
+- Publish cached reader assets atomically, keep canceled writers from erasing newer images, and limit concurrent image prefetches.
+- Load native lazy chapter images eagerly and sanitize embedded scripts, handlers and executable links according to reader settings, while retaining enabled CSS/JS and media policies.
+- Preserve custom update intervals when loading novels through resident, paged and reactive library queries.
+- Restore JS source filter presets by filter names and types, preserving selected options and group items after reordering.
+- Exclude credential-bearing AI provider definitions and legacy translation secrets from ordinary backups and sync; keep saved credentials when restoring blank values.
+- Recount paged-reader layouts when existing chapter text nodes change.
+- Keep a delayed layout refresh from undoing page turns or anchor navigation after showing reader feedback.
 - Prevent checkpoint chapters from saving reading progress or being automatically marked as read.
 - Align the statistics time bar for novels outside the library with the other novel rows.
 

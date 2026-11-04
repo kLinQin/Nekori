@@ -1545,4 +1545,12 @@
     <string name="novel_database_cleanup_failed">Could not clear database</string>
     <string name="snippet_active_count">Applying %1$d snippets</string>
     <string name="content_delete_selected">Delete %d selected items?</string>
+    <string name="error_cant_edit_error_page">Can\'t edit an error page</string>
+    <string name="error_cant_edit_while_loading">Can\'t edit while the chapter is loading</string>
+    <string name="error_cant_edit_no_chapter">Nothing to edit in this chapter</string>
+    <string name="based_on_tsundoku">Based on Tsundoku</string>
+    <string name="based_on_mihon">Based on Mihon</string>
+    <string name="pref_novel_hide_chapter_separator">Hide chapter separator</string>
+    <string name="action_scroll_to_next_unread">Scroll to next unread</string>
+    <string name="manga_no_unread_chapter">No unread chapter in this list</string>
 </resources>
