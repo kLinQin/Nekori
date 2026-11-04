@@ -20,12 +20,20 @@ function isColors(value: unknown): value is ReplaceColors {
   return keys.every((k) => typeof (value as Record<string, unknown>)[k] === 'string');
 }
 
+const REPLACE_CLASS_NAME = 'nk-replace';
+const ORIGINAL_ATTR_NAME = 'data-nk-original';
+
 export function registerReplaceCommands(root: HTMLElement, host: ReaderHost): ReplaceController {
   let disposed = false;
   let observer: MutationObserver | null = null;
   let debounce = 0;
   let currentProfile: ProfileData = { fr: [], hl: [] };
   let currentColors: ReplaceColors | null = null;
+  // Saat tap-swap teks, observer dimatikan sementara supaya runDecorations tidak re-apply
+  // dan menghapus state swap.
+  let suppressObserver = false;
+  // Teks replace asli per span (diisi saat pertama kali swap), dipakai untuk balik lagi.
+  const replaceTextMap = new WeakMap<HTMLElement, string>();
 
   const applyNow = (): void => {
     if (disposed || !currentColors) return;
@@ -41,6 +49,7 @@ export function registerReplaceCommands(root: HTMLElement, host: ReaderHost): Re
   const startObserver = (): void => {
     if (observer) return;
     observer = new MutationObserver(() => {
+      if (suppressObserver) return;
       const chapters = root.querySelectorAll(CHAPTER_TAG_NAME);
       for (const chapter of Array.from(chapters)) {
         if (!chapter.querySelector('.nk-hl, .nk-quote, .nk-replace, .nk-bracket')) {
@@ -72,6 +81,37 @@ export function registerReplaceCommands(root: HTMLElement, host: ReaderHost): Re
 
   startObserver();
 
+  const onTap = (rawEvent: Event): void => {
+    if (disposed) return;
+    const event = rawEvent as MouseEvent;
+    if (event.defaultPrevented || event.button !== 0) return;
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    const target = event.target;
+    const element = target instanceof Element ? target : target instanceof Node ? target.parentElement : null;
+    const span = element ? element.closest<HTMLElement>('.' + REPLACE_CLASS_NAME) : null;
+    if (!span || !root.contains(span)) return;
+    const original = span.getAttribute(ORIGINAL_ATTR_NAME);
+    if (original === null) return;
+    const currentText = span.textContent ?? '';
+    const storedReplace = replaceTextMap.get(span);
+    // Kalau teks saat ini === original, berarti sedang menampilkan asli → balik ke replace.
+    // Kalau belum pernah swap, simpan teks replace sekarang.
+    if (currentText === original && storedReplace !== undefined) {
+      span.textContent = storedReplace;
+    } else {
+      if (storedReplace === undefined) {
+        replaceTextMap.set(span, currentText);
+      }
+      span.textContent = original;
+    }
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  };
+
+  // Capture + stopImmediatePropagation: hentikan handler lain (mis. anchor
+  // fragment resolution) hanya saat target di dalam .nk-replace.
+  root.addEventListener('click', onTap, true);
+
   return {
     apply(profile, colors) {
       currentProfile = profile;
@@ -83,6 +123,7 @@ export function registerReplaceCommands(root: HTMLElement, host: ReaderHost): Re
       observer?.disconnect();
       observer = null;
       window.clearTimeout(debounce);
+      root.removeEventListener('click', onTap, true);
       for (const unsub of unsubs) unsub();
     },
   };
