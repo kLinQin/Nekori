@@ -201,7 +201,7 @@ class DiscordRpcManager internal constructor(
                 largeImage = resolvedCover,
                 largeText = chapterPage?.let { "[$it]: $chapterName" } ?: chapterName,
                 smallImage = DiscordProtocol.APP_LOGO_ASSET_ID,
-                smallText = "Nekori",
+                smallText = "Egg",
                 action = chapterUrl?.let {
                     localizedContext.stringResource(TDMR.strings.discord_read_chapter) to it
                 },
@@ -234,7 +234,7 @@ class DiscordRpcManager internal constructor(
             basePresence(
                 state = state,
                 largeImage = DiscordProtocol.APP_LOGO_ASSET_ID,
-                largeText = "Nekori",
+                largeText = "Egg",
             ),
         )
     }

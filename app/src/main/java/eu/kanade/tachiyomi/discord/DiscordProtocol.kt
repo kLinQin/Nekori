@@ -23,13 +23,13 @@ import java.security.SecureRandom
 import java.util.Base64
 
 internal object DiscordProtocol {
-    const val CLIENT_ID = "1510134118048858142"
+    const val CLIENT_ID = "1567890847503097876"
     const val REDIRECT_URI = "nekori://discord-auth"
     const val SCOPE = "openid sdk.social_layer sdk.social_layer_presence"
     const val API_BASE = "https://gaming-sdk.com/api"
     const val GATEWAY_URL = "wss://gateway.gaming-sdk.com/?v=9&encoding=json"
     const val USER_AGENT = "Discord Embedded/1.9.15780"
-    const val APP_LOGO_ASSET_ID = "1539333482780565514"
+    const val APP_LOGO_ASSET_ID = "eggglyph"
 
     const val OP_DISPATCH = 0
     const val OP_HEARTBEAT = 1
