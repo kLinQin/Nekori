@@ -65,6 +65,11 @@ internal fun ColumnScope.NovelTapZoneSettings(preferences: ReaderPreferences) {
         }
     }
 
+    ReaderSwitchItem(
+        label = stringResource(TDMR.strings.pref_novel_tap_zone_show_chrome),
+        pref = preferences.novelTapZoneShowChrome,
+    )
+
     if (navigationModeNovel == ReaderPreferences.TAPZONE_BOTTOM_INDEX) {
         val bottomZoneHeight by preferences.novelBottomZoneHeight.collectAsState()
         SliderItem(

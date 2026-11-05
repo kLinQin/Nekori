@@ -470,7 +470,7 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
                 when (gestureTarget.tapAction(isVideoChapter = isVideoChapter())) {
                     ReaderTapAction.NONE -> return true
                     ReaderTapAction.TOGGLE_MENU -> {
-                        activity.toggleMenu()
+                        activity.toggleMenuFromTap()
                         return true
                     }
                     ReaderTapAction.TAP_ZONES -> Unit
@@ -485,14 +485,14 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
                 if (preferences.navigationModeNovel.get() in ReaderPreferences.TAPZONE_ZONE_ONLY_MODES) {
                     val menuZone = navigator.getRegions().firstOrNull()?.rectF
                     if (menuZone != null && menuZone.contains(pos.x, pos.y)) {
-                        activity.toggleMenu()
+                        activity.toggleMenuFromTap()
                     }
                     return true
                 }
 
                 when (navigator.getAction(pos)) {
                     eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation.NavigationRegion.MENU -> {
-                        activity.toggleMenu()
+                        activity.toggleMenuFromTap()
                     }
                     eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation.NavigationRegion.NEXT -> pageScrollBy(1)
                     eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation.NavigationRegion.PREV -> pageScrollBy(-1)

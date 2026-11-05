@@ -59,7 +59,9 @@ class ReaderPreferences(
         false,
     )
 
-    val novelTranslateFloating: Preference<Boolean> = preferenceStore.getBoolean(
+    // deprecated: translate no longer moves to a floating button; status-bar item replaces it.
+    @Suppress("unused")
+    private val novelTranslateFloatingLegacy: Preference<Boolean> = preferenceStore.getBoolean(
         "pref_novel_translate_floating",
         false,
     )
@@ -441,6 +443,14 @@ class ReaderPreferences(
     val novelStatusBarShowWordCount: Preference<Boolean> = preferenceStore.getBoolean(
         "pref_novel_status_bar_show_word_count",
         false,
+    )
+    val novelStatusBarShowTranslate: Preference<Boolean> = preferenceStore.getBoolean(
+        "pref_novel_status_bar_show_translate",
+        false,
+    )
+    val novelTapZoneShowChrome: Preference<Boolean> = preferenceStore.getBoolean(
+        "pref_novel_tap_zone_show_chrome",
+        true,
     )
     // endregion
 

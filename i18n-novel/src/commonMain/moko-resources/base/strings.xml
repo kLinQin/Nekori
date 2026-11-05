@@ -759,6 +759,9 @@
     <string name="novel_status_bar_element_progress">Progress</string>
     <string name="novel_status_bar_element_battery">Battery</string>
     <string name="novel_status_bar_element_word_count">Word count</string>
+    <string name="novel_status_bar_element_translate">Translate</string>
+    <string name="pref_novel_status_bar_show_translate">Show translate in status bar</string>
+    <string name="pref_novel_tap_zone_show_chrome">Tap zones show bottom bar</string>
     <!-- Discord Rich Presence -->
     <string name="pref_category_discord">Discord Rich Presence</string>
     <string name="pref_discord_summary">Share browsing and reading activity with Discord</string>

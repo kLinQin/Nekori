@@ -7,6 +7,8 @@ import android.content.IntentFilter
 import android.os.BatteryManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
@@ -17,6 +19,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Translate
+import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material.icons.outlined.Battery0Bar
 import androidx.compose.material.icons.outlined.Battery1Bar
 import androidx.compose.material.icons.outlined.Battery2Bar
@@ -30,6 +35,7 @@ import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -97,6 +103,8 @@ fun NovelStatusBar(
     showProgress: Boolean,
     showBattery: Boolean,
     showCharging: Boolean,
+    showTranslate: Boolean = false,
+    onTranslateClick: () -> Unit = {},
     backgroundColor: Color,
     textColor: Color,
     isCollapsed: Boolean,
@@ -156,10 +164,15 @@ fun NovelStatusBar(
         onDispose { context.unregisterReceiver(receiver) }
     }
 
+    val statusBarInteractionSource = remember { MutableInteractionSource() }
     BoxWithConstraints(
         modifier = modifier
             .fillMaxWidth()
             .background(backgroundColor)
+            .clickable(
+                interactionSource = statusBarInteractionSource,
+                indication = null,
+            ) { /* consume background taps so they do not reach the WebView */ }
             .onSizeChanged { onHeightChanged(it.height) }
             .padding(horizontal = 12.dp, vertical = verticalPadding),
     ) {
@@ -207,6 +220,20 @@ fun NovelStatusBar(
                                 maxLines = 1,
                                 modifier = itemSpacing,
                             )
+                        }
+
+                        StatusBarItem.TRANSLATE -> if (showTranslate) {
+                            Row(
+                                modifier = itemSpacing.clickable(role = Role.Button, onClick = onTranslateClick),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Icon(
+                                    imageVector = androidx.compose.material.icons.Icons.Outlined.Translate,
+                                    contentDescription = "Translate",
+                                    tint = contentColor,
+                                    modifier = Modifier.size(iconSize),
+                                )
+                            }
                         }
 
                         StatusBarItem.BATTERY -> if (showBattery && batteryPercent >= 0) {

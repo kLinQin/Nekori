@@ -702,6 +702,10 @@ internal fun ColumnScope.NovelControlsTab(screenModel: ReaderSettingsViewModel) 
             label = stringResource(TDMR.strings.pref_novel_status_bar_show_word_count),
             pref = screenModel.preferences.novelStatusBarShowWordCount,
         )
+        ReaderSwitchItem(
+            label = stringResource(TDMR.strings.pref_novel_status_bar_show_translate),
+            pref = screenModel.preferences.novelStatusBarShowTranslate,
+        )
         val statusBarSizeOptions = listOf(
             stringResource(TDMR.strings.novel_status_bar_size_small) to "small",
             stringResource(TDMR.strings.novel_status_bar_size_medium) to "medium",
@@ -763,11 +767,6 @@ internal fun ColumnScope.NovelAdvancedTab(
         summary = stringResource(TDMR.strings.pref_novel_find_replace_note_lower),
     )
 
-    ReaderSwitchItem(
-        label = stringResource(TDMR.strings.pref_novel_translate_floating),
-        pref = screenModel.preferences.novelTranslateFloating,
-        summary = stringResource(TDMR.strings.pref_novel_translate_floating_summary),
-    )
 
     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 

@@ -62,6 +62,7 @@ class StatusBarElementsScreen : Screen {
             StatusBarItem.PROGRESS -> preferences.novelStatusBarShowProgress.get()
             StatusBarItem.BATTERY -> preferences.novelStatusBarShowBattery.get()
             StatusBarItem.WORD_COUNT -> preferences.novelStatusBarShowWordCount.get()
+            StatusBarItem.TRANSLATE -> preferences.novelStatusBarShowTranslate.get()
         }
 
         fun setItemEnabled(item: StatusBarItem, enabled: Boolean) {
@@ -74,6 +75,7 @@ class StatusBarElementsScreen : Screen {
                 StatusBarItem.PROGRESS -> preferences.novelStatusBarShowProgress.set(enabled)
                 StatusBarItem.BATTERY -> preferences.novelStatusBarShowBattery.set(enabled)
                 StatusBarItem.WORD_COUNT -> preferences.novelStatusBarShowWordCount.set(enabled)
+                StatusBarItem.TRANSLATE -> preferences.novelStatusBarShowTranslate.set(enabled)
             }
         }
 
@@ -165,6 +167,7 @@ class StatusBarElementsScreen : Screen {
             StatusBarItem.PROGRESS -> TDMR.strings.novel_status_bar_element_progress
             StatusBarItem.BATTERY -> TDMR.strings.novel_status_bar_element_battery
             StatusBarItem.WORD_COUNT -> TDMR.strings.novel_status_bar_element_word_count
+            StatusBarItem.TRANSLATE -> TDMR.strings.novel_status_bar_element_translate
         },
     )
 }

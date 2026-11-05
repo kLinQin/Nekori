@@ -8,6 +8,7 @@ enum class StatusBarItem(val id: String) {
     PROGRESS("progress"),
     BATTERY("battery"),
     WORD_COUNT("word_count"),
+    TRANSLATE("translate"),
 }
 
 val DefaultStatusBarOrder = listOf(
@@ -15,6 +16,7 @@ val DefaultStatusBarOrder = listOf(
     StatusBarItem.CHAPTER,
     StatusBarItem.PROGRESS,
     StatusBarItem.WORD_COUNT,
+    StatusBarItem.TRANSLATE,
     StatusBarItem.BATTERY,
 )
 
