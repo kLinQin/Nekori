@@ -2,10 +2,10 @@ package eu.kanade.tachiyomi.ui.reader.replace
 
 /**
  * In-memory history for replace input in ReplaceQuickAddSheet.
- * Lost when app process dies. Max 10 items, newest first.
+ * Lost when app process dies. Max 30 items, newest first.
  */
 internal object ReplaceHistory {
-    private const val MAX = 10
+    private const val MAX = 30
     private val items = ArrayDeque<String>()
 
     fun snapshot(): List<String> = items.toList()
