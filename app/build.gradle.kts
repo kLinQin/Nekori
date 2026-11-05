@@ -222,7 +222,7 @@ android {
     namespace = "eu.kanade.tachiyomi"
 
     defaultConfig {
-        applicationId = "app.yuneko.nekori"
+        applicationId = "app.egg.novel"
 
         versionCode = 14
         versionName = "0.1.3"

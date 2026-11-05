@@ -161,7 +161,7 @@ internal data class DiscordPresence(
     val startedAt: Long,
 ) {
     fun toJson(): JsonObject = buildJsonObject {
-        put("name", "Nekori")
+        put("name", "Egg")
         put("type", 3)
         put("application_id", DiscordProtocol.CLIENT_ID)
         formatRpcString(state)?.let { put("state", it) }

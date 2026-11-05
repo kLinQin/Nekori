@@ -37,12 +37,12 @@ internal class NovelReaderBridge(
         val nextOrigin = requireNotNull(NovelReaderProtocol.origin(baseUrl))
         resetDocument(removeListener = origin != nextOrigin)
         check(WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)) {
-            "Nekori reader requires Android WebView 138.0.7204.181 with web messaging support."
+            "Egg reader requires Android WebView 138.0.7204.181 with web messaging support."
         }
         check(
             NovelReaderProtocol.supportsVersion(WebViewCompat.getCurrentWebViewPackage(webView.context)?.versionName),
         ) {
-            "Nekori reader requires Android WebView 138.0.7204.181 or newer."
+            "Egg reader requires Android WebView 138.0.7204.181 or newer."
         }
         origin = nextOrigin
         documentId = UUID.randomUUID().toString()

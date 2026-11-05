@@ -56,7 +56,7 @@ internal class GuidesStep(
     }
 }
 
-const val GETTING_STARTED_URL = "https://nekori.yuneko.dev/docs/guides/getting-started"
+const val GETTING_STARTED_URL = "https://github.com/kLinQin/Nekori"
 
 @PreviewLightDark
 @Composable

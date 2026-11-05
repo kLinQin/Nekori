@@ -13,34 +13,34 @@
 * **Native Selection Actions:** Selecting text shows F (Find), H (Highlight), and T (Translate) actions.
 * **Direct Selection Translation:** Highlight text and tap Translate to auto-translate (ID → EN) and pre-fill the Quick-Add form.
 * **Live Search & Compact UI:** Live search for large lists, compact layout without layout shifts.
-* **Replace History Auto-Capture:** Copied novel text is auto-added to the Replace history chips (max 10, in-memory).
+* **Replace History Auto-Capture:** Copied novel text is auto-added to the Replace history chips (max 30, in-memory).
 * **Color Palette Presets:** Rose, Amber, Cool, Fresh, and Warm palettes with gradient previews for highlight colors.
 * **New App Themes:** Claude (warm earthy) and Sakura (soft pastel pink).
 * **Reader Content Border:** 1dp `outlineVariant` border, 2dp radius, around the chapter area only — consistent with the Library/Updates/History frame.
 * **Reader Status Bar Border & Inset:** Status bar framed and width-matched to the reading area; content border lifts when the bar is at the bottom.
 * **Tap-to-Reveal Original Text:** Tap a Find & Replace result to show the original text inline, copyable with surrounding text; tap again to revert.
-* **Non-Circular Floating Buttons:** Translate FAB and selection action buttons use a 10dp rounded-square shape, inset 4dp from the content border.
+* **Status Bar Translate + Tap-Zone Toggle:** Translate action moved from floating FAB to the reader status bar; tap-zone chrome visibility toggled from settings.
 
 ---
 
 <div align="center">
 
-<img src="./.github/assets/logo.png" alt="Nekori logo" title="Nekori logo" width="80"/>
+<img src="./.github/assets/logo.svg" alt="Egg logo" title="Egg logo" width="80"/>
 
-# Nekori [App](#)
+# Egg [App](#)
 
 ### Novel reader for LNReader plugins
 A personal fork of [Tsundoku](https://github.com/tsundoku-otaku/tsundoku), built around the LNReader plugin ecosystem.
 
-[![GitHub downloads](https://img.shields.io/github/downloads/Yuneko-dev/Nekori/total?label=downloads&labelColor=27303D&color=0D1117&logo=github&logoColor=FFFFFF&style=flat)](https://github.com/Yuneko-dev/Nekori/releases)
-[![CI](https://img.shields.io/github/actions/workflow/status/Yuneko-dev/Nekori/build.yml?labelColor=27303D)](https://github.com/Yuneko-dev/Nekori/actions/workflows/build.yml)
-[![License: Apache-2.0](https://img.shields.io/github/license/Yuneko-dev/Nekori?labelColor=27303D&color=0877d2)](/LICENSE)
+[![GitHub downloads](https://img.shields.io/github/downloads/kLinQin/Nekori/total?label=downloads&labelColor=27303D&color=0D1117&logo=github&logoColor=FFFFFF&style=flat)](https://github.com/kLinQin/Nekori/releases)
+[![CI](https://img.shields.io/github/actions/workflow/status/kLinQin/Nekori/build.yml?labelColor=27303D)](https://github.com/kLinQin/Nekori/actions/workflows/build.yml)
+[![License: Apache-2.0](https://img.shields.io/github/license/kLinQin/Nekori?labelColor=27303D&color=0877d2)](/LICENSE)
 
 </div>
 
 > [!IMPORTANT]
-> **Nekori does not support Kotlin extensions.** Nothing built against `tachiyomix` will load — not
-> Tachiyomi's, not Mihon's, not Tsundoku's. Online content sources are **LNReader and Nekori JavaScript plugins**.
+> **Egg does not support Kotlin extensions.** Nothing built against `tachiyomix` will load — not
+> Tachiyomi's, not Mihon's, not Tsundoku's. Online content sources are **LNReader and Egg JavaScript plugins**.
 >
 > So yes: this is a fork of a fork of Tachiyomi that cannot run a single Tachiyomi extension. Funny, isn't it.
 
@@ -53,16 +53,16 @@ A personal fork of [Tsundoku](https://github.com/tsundoku-otaku/tsundoku), built
 
 ## Download
 
-[![Nekori Stable](https://img.shields.io/github/release/Yuneko-dev/Nekori.svg?maxAge=3600&label=Stable&labelColor=06599d&color=043b69)](https://github.com/Yuneko-dev/Nekori/releases/latest)
+[![Fork Builds](https://img.shields.io/github/release/kLinQin/Nekori.svg?maxAge=3600&label=Latest&labelColor=06599d&color=043b69)](https://github.com/kLinQin/Nekori/releases/latest)
 
 *Requires Android 8.0 or higher and Android System WebView 138.0.7204.181 or newer.*
 
-Nekori installs alongside Tsundoku rather than upgrading it — the application id is `app.yuneko.nekori`. Moving your
+This fork installs alongside Nekori (upstream) — the application id is `app.egg.novel`. Moving your
 library across is a backup and a restore.
 
 ## Features
 
-Most of this comes from Tsundoku and, before it, Mihon. Nekori keeps it rather than rebuilds it — the list below is
+Most of this comes from Tsundoku and, before it, Mihon. Egg keeps it rather than rebuilds it — the list below is
 what the app does, not what this fork added. For the fork's own changes, see
 [NEKORI_CHANGELOG.md](./NEKORI_CHANGELOG.md).
 
@@ -122,7 +122,7 @@ what the app does, not what this fork added. For the fork's own changes, see
 
 ## Differences from Tsundoku
 
-Tsundoku is a Mihon fork that added novel support while keeping the manga side intact. Nekori drops that side entirely:
+Tsundoku is a Mihon fork that added novel support while keeping the manga side intact. Egg drops that side entirely:
 
 * The manga page viewer, the native image decoder and the Fresco stack are gone.
 * Kotlin extension discovery and the Shizuku extension installer are gone.
@@ -130,7 +130,7 @@ Tsundoku is a Mihon fork that added novel support while keeping the manga side i
 * React Native is the plugin runtime only — the reader itself is a native WebView plus Compose.
 
 Everything else stays. The library, categories, trackers, themes, backups, downloads, statistics and the whole
-settings surface are Tsundoku's, and Nekori follows upstream rather than diverging from it — this fork is a narrowing,
+settings surface are Tsundoku's, and Egg follows upstream rather than diverging from it — this fork is a narrowing,
 not a rewrite.
 
 The full list lives in [NEKORI_CHANGELOG.md](./NEKORI_CHANGELOG.md). [CHANGELOG.md](./CHANGELOG.md) is Tsundoku's own
@@ -149,12 +149,12 @@ bundled assets from the TypeScript source.
 
 This is a personal project rather than a community fork, so it does not have a dedicated Discord server or
 translation project yet. Questions and bug reports are welcome in
-[Discussions](https://github.com/Yuneko-dev/Nekori/discussions) or
-[Issues](https://github.com/Yuneko-dev/Nekori/issues); I will try to respond as soon as I can.
+[Discussions](https://github.com/kLinQin/Nekori/discussions) or
+[Issues](https://github.com/kLinQin/Nekori/issues); I will try to respond as soon as I can.
 
 ### Credits
 
-Nekori exists because of work done elsewhere:
+Egg exists because of work done elsewhere:
 
 * [Mihon](https://github.com/mihonapp/mihon) and [Tachiyomi](https://github.com/tachiyomiorg/tachiyomi) — the app this
   is descended from.
@@ -173,6 +173,8 @@ application hosts zero content.
 Copyright © 2015 Javier Tomás
 Copyright © 2024 Mihon Open Source Project
 Copyright © 2026 Nekori
+Copyright © 2026 Egg
+Copyright © 2026 Egg
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

@@ -33,7 +33,7 @@ class AppUpdateChecker {
 }
 
 val GITHUB_REPO: String by lazy {
-    if (isNightlyBuildType) "Yuneko-dev/Nekori-nightly" else "Yuneko-dev/Nekori"
+    if (isNightlyBuildType) "kLinQin/Nekori-nightly" else "kLinQin/Nekori"
 }
 
 val RELEASE_TAG: String by lazy {

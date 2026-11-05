@@ -150,7 +150,7 @@ class DiscordRpcManager internal constructor(
                 details = localizedContext.stringResource(TDMR.strings.discord_activity_source),
                 state = sourceName,
                 largeImage = DiscordProtocol.APP_LOGO_ASSET_ID,
-                largeText = "Nekori",
+                largeText = "Egg",
                 smallImage = icon,
                 smallText = sourceName,
                 action = sourceUrl?.let {
@@ -175,7 +175,7 @@ class DiscordRpcManager internal constructor(
                 largeImage = resolvedCover,
                 largeText = novelName,
                 smallImage = DiscordProtocol.APP_LOGO_ASSET_ID,
-                smallText = "Nekori",
+                smallText = "Egg",
                 action = novelUrl?.let {
                     localizedContext.stringResource(TDMR.strings.discord_view_novel) to it
                 },
@@ -272,7 +272,7 @@ class DiscordRpcManager internal constructor(
         val buttons = buildList {
             add(
                 localizedContext.stringResource(TDMR.strings.discord_read_on_nekori) to
-                    "https://github.com/Yuneko-dev/Nekori",
+                    "https://github.com/kLinQin/Nekori",
             )
             action?.takeIf { isHttpUrl(it.second) }?.let(::add)
         }

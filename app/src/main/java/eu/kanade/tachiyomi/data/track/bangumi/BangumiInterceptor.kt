@@ -35,7 +35,7 @@ class BangumiInterceptor(private val bangumi: Bangumi) : Interceptor {
         return originalRequest.newBuilder()
             .header(
                 "User-Agent",
-                "Yuneko-dev/Nekori/v${BuildConfig.VERSION_NAME} (Android) (https://github.com/Yuneko-dev/Nekori)",
+                "kLinQin/Nekori/v${BuildConfig.VERSION_NAME} (Android) (https://github.com/kLinQin/Nekori)",
             )
             .apply {
                 addHeader("Authorization", "Bearer ${currAuth.accessToken}")

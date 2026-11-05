@@ -158,7 +158,7 @@ object AboutScreen : Screen() {
                 item {
                     TextPreferenceWidget(
                         title = stringResource(MR.strings.privacy_policy),
-                        onPreferenceClick = { uriHandler.openUri("https://nekori.yuneko.dev/privacy/") },
+                        onPreferenceClick = { uriHandler.openUri("https://github.com/kLinQin/Nekori") },
                     )
                 }
 
@@ -186,7 +186,7 @@ object AboutScreen : Screen() {
                         LinkIcon(
                             label = stringResource(MR.strings.website),
                             icon = Icons.Outlined.Public,
-                            url = "https://nekori.yuneko.dev",
+                            url = "https://github.com/kLinQin/Nekori",
                         )
                         // LinkIcon(
                         //     label = "Discord",
@@ -211,7 +211,7 @@ object AboutScreen : Screen() {
                         LinkIcon(
                             label = "GitHub",
                             icon = CustomIcons.Github,
-                            url = "https://github.com/Yuneko-dev/Nekori",
+                            url = "https://github.com/kLinQin/Nekori",
                         )
                     }
                 }
