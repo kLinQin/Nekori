@@ -53,6 +53,7 @@ import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.FastForward
 import androidx.compose.material.icons.outlined.FastRewind
+import androidx.compose.material.icons.outlined.FindReplace
 import androidx.compose.material.icons.outlined.FormatQuote
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.KeyboardArrowUp
@@ -195,13 +196,16 @@ fun NovelReaderAppBars(
     isWebView: Boolean = true,
     onQuotes: () -> Unit,
 
+    // CHANGED: new callback for Find & Replace / Highlight drawer
+    onReplaceHighlight: () -> Unit,
+
     // Toolbar customization
     bottomBarItems: List<BottomBarItemState>,
 
     // Extra bottom offset for the floating TTS overlay so it clears the status bar
     ttsOverlayBottomPadding: Dp = 0.dp,
 
-) {
+    ) {
     val backgroundColor = MaterialTheme.colorScheme
         .surfaceColorAtElevation(3.dp)
         .copy(alpha = if (isSystemInDarkTheme()) 0.9f else 0.95f)
@@ -371,6 +375,8 @@ fun NovelReaderAppBars(
                         isWebView = isWebView,
                         onToggleEdit = onToggleEdit,
                         onQuotes = onQuotes,
+                        // CHANGED: pass new callback
+                        onReplaceHighlight = onReplaceHighlight,
                     )
                 }
             }
@@ -640,6 +646,8 @@ private fun NovelReaderBottomBar(
     onQuotes: () -> Unit,
     onOpenInWebView: (() -> Unit)?,
     onShare: (() -> Unit)?,
+    // CHANGED: new callback
+    onReplaceHighlight: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val enabledItems = remember(
@@ -743,6 +751,18 @@ private fun NovelReaderBottomBar(
                         Icon(
                             Icons.Outlined.Description,
                             contentDescription = stringResource(TDMR.strings.action_summarize_chapter),
+                            modifier = Modifier.size(iconSize),
+                        )
+                    }
+
+                    // CHANGED: Find & Replace / Highlight button
+                    BottomBarItem.REPLACE_HIGHLIGHT -> IconButton(
+                        onClick = onReplaceHighlight,
+                        modifier = Modifier.size(buttonSize),
+                    ) {
+                        Icon(
+                            Icons.Outlined.FindReplace,
+                            contentDescription = stringResource(TDMR.strings.action_replace_highlight),
                             modifier = Modifier.size(iconSize),
                         )
                     }
@@ -873,7 +893,7 @@ private fun NovelReaderBottomBar(
                     BottomBarItem.TTS_PREV_PARAGRAPH,
                     BottomBarItem.TTS_NEXT_PARAGRAPH,
                     BottomBarItem.TTS_VIEWPORT,
-                    -> Unit
+                        -> Unit
 
                     // Orientation
                     BottomBarItem.ORIENTATION -> IconButton(
@@ -934,8 +954,6 @@ private fun NovelReaderBottomBar(
                         }
                     }
 
-                    // Filtered out above when the source has no web support, so the callbacks are
-                    // non-null by the time an item reaches here.
                     BottomBarItem.WEBVIEW -> IconButton(
                         onClick = { onOpenInWebView?.invoke() },
                         modifier = Modifier.size(buttonSize),
@@ -1051,6 +1069,9 @@ internal fun bottomBarItemInfo(
     BottomBarItem.SUMMARIZE_CHAPTER ->
         Icons.Outlined.Description to
             stringResource(TDMR.strings.action_summarize_chapter)
+    // CHANGED: Find & Replace / Highlight item (label hardcoded for now)
+    BottomBarItem.REPLACE_HIGHLIGHT ->
+        Icons.Outlined.FindReplace to stringResource(TDMR.strings.action_replace_highlight)
 }
 
 @Composable
@@ -1077,10 +1098,8 @@ private fun NovelProgressSlider(
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // Current progress percentage
         Box(contentAlignment = Alignment.CenterEnd) {
             Text(text = "$currentProgress%")
-            // Taking up full length so the slider doesn't shift
             Text(text = "100%", color = Color.Transparent)
         }
 
@@ -1144,7 +1163,6 @@ private fun NovelVerticalProgressSlider(
                 (currentValue.toFloat() / safeMaxValue).coerceIn(0f, 1f)
             }
 
-            // Vertical track
             Box(
                 modifier = Modifier
                     .fillMaxHeight()
@@ -1153,7 +1171,6 @@ private fun NovelVerticalProgressSlider(
                     .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.22f)),
             )
 
-            // Filled progress from top down
             Box(
                 modifier = Modifier
                     .align(Alignment.TopCenter)

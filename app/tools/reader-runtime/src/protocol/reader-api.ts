@@ -56,6 +56,12 @@ export interface ReaderEventMap {
   'media.download.error': { code: string; message: string };
   'document.stateChanged': { runtime: ReaderConfig['runtime']; event?: string };
   'reader.log': { message: string };
+  'replace.exportJson': { json: string };
+  'replace.status': { applied: number; highlightCount: number };
+  'replace.reloadChapter': Record<string, never>;
+  'replace.openWithPrefill': { find?: string; replace?: string; hl?: string };
+  'replace.translateSelection': { text: string };
+  'replace.selectionChanged': { text: string };
 }
 
 export type ReaderEventName = keyof ReaderEventMap;
@@ -70,8 +76,11 @@ export type ReaderCommandName =
   | 'layout.finishTurn' | 'tts.highlight' | 'tts.clearHighlight' | 'tts.extractText'
   | 'tts.firstVisibleParagraph' | 'tts.taggedParagraph' | 'selection.read' | 'selection.readAnchor'
   | 'selection.clear' | 'selection.blur' | 'style.apply' | 'ui.configure' | 'ui.setTtsEnabled'
-  | 'ui.setBionic' | 'ui.refresh' | 'ui.configureNextChapter' | 'scrollTracking.configure' | 'anchors.install'
-  | 'summary.focus' | 'summary.render' | 'summary.remove' | 'feedback.show' | 'feedback.clear' | 'snippet.run';
+  | 'ui.setBionic' | 'ui.refresh' | 'ui.configureNextChapter' | 'ui.setOutlineVariant' | 'scrollTracking.configure' | 'anchors.install'
+  | 'summary.focus' | 'summary.render' | 'summary.remove' | 'feedback.show' | 'feedback.clear' | 'snippet.run'
+  | 'replace.applyDecorations'
+  | 'replace.emitTranslate'
+  | 'replace.applyTranslation';
 
 export interface ReaderEventBus {
   subscribe<K extends keyof ReaderEventMap>(name: K, listener: (payload: ReaderEventMap[K]) => void): Unsubscribe;

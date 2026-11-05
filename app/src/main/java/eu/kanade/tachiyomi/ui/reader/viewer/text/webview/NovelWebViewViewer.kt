@@ -39,7 +39,10 @@ import androidx.lifecycle.Lifecycle
 import com.hippo.unifile.UniFile
 import eu.kanade.domain.manga.model.WordDensity
 import eu.kanade.tachiyomi.BuildConfig
+import eu.kanade.tachiyomi.data.replace.ReplaceColors
+import eu.kanade.tachiyomi.data.replace.ReplaceStore
 import eu.kanade.tachiyomi.data.translation.ChapterSummaryService
+import eu.kanade.tachiyomi.data.translation.TranslationEngineManager
 import eu.kanade.tachiyomi.jsplugin.source.JsSource
 import eu.kanade.tachiyomi.jsplugin.source.applyJsImageRequestInit
 import eu.kanade.tachiyomi.network.NetworkHelper
@@ -120,6 +123,10 @@ import logcat.LogPriority
 import logcat.logcat
 import okhttp3.Request
 import tachiyomi.core.common.i18n.stringResource
+import tachiyomi.domain.translation.model.TranslationEngineId
+import tachiyomi.domain.translation.model.TranslationPurpose
+import tachiyomi.domain.translation.model.TranslationRequest
+import tachiyomi.domain.translation.model.TranslationResult
 import tachiyomi.domain.translation.service.TranslationPreferences
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.novel.TDMR
@@ -166,6 +173,7 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
     private val networkHelper: NetworkHelper by injectLazy()
     private val getIncognitoState: eu.kanade.domain.source.interactor.GetIncognitoState by injectLazy()
     private val chapterSummaryService: ChapterSummaryService by injectLazy()
+    private val translationEngineManager: TranslationEngineManager by injectLazy()
     private val contentPipeline = ContentPipeline(preferences)
     private val assetLoader = NovelWebViewAssetLoader(activity.assets)
     private var proxyServer: NovelReaderProxyServer? = null
@@ -401,6 +409,12 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
         )
     }
 
+    private val _replaceSelection = MutableStateFlow("")
+    val replaceSelection: StateFlow<String> = _replaceSelection.asStateFlow()
+    private val _translatedSelection = MutableStateFlow<Pair<String, String>?>(null)
+    val translatedSelection: StateFlow<Pair<String, String>?> = _translatedSelection.asStateFlow()
+    fun consumeTranslatedSelection() { _translatedSelection.value = null }
+
     var pendingSelectedText: String? = null
     var pendingParagraphIndex: Int? = null
 
@@ -513,7 +527,6 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
         // Disable long press handling so WebView can handle text selection
         setIsLongpressEnabled(false)
     }
-
     init {
         proxyServer = if (preferences.novelWebViewLocalProxyEnabled.get()) {
             runCatching {
@@ -729,8 +742,10 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
                             }
                             return callback.onActionItemClicked(mode, item)
                         }
-                        override fun onDestroyActionMode(mode: ActionMode) =
+                        override fun onDestroyActionMode(mode: ActionMode) {
                             callback.onDestroyActionMode(mode)
+                            captureSelectionClipboard()
+                        }
 
                         // Forward the content rect so the toolbar floats near the selection
                         override fun onGetContentRect(mode: ActionMode, view: View, outRect: android.graphics.Rect) =
@@ -760,8 +775,10 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
                             }
                             return callback.onActionItemClicked(mode, item)
                         }
-                        override fun onDestroyActionMode(mode: ActionMode) =
+                        override fun onDestroyActionMode(mode: ActionMode) {
                             callback.onDestroyActionMode(mode)
+                            captureSelectionClipboard()
+                        }
                     }
                 }
                 return super.startActionMode(wrapped, type)
@@ -1141,6 +1158,75 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
                     if (webChapterIsError) retryCurrentChapter() else inlineFeedback.retryPendingError()
                 }
                 "clipboard.copy" -> payload.string("text")?.let(::copyToClipboard)
+                "replace.reloadChapter" -> activity.viewModel.reloadChapter(fromSource = false)
+                "replace.exportJson" -> payload.string("json")?.let { json ->
+                    copyToClipboard(json)
+                    activity.runOnUiThread {
+                        android.widget.Toast.makeText(activity, "JSON copied to clipboard", android.widget.Toast.LENGTH_SHORT).show()
+                    }
+                }
+                "replace.selectionChanged" -> payload.string("text")?.let { _replaceSelection.value = it }
+                "replace.translateSelection" -> {
+                    val text = payload.string("text")?.takeIf { it.isNotBlank() }
+                    val target = payload.string("targetLanguage") ?: "en"
+                    if (text != null) {
+                        scope.launch {
+                            val resolved = translationEngineManager.resolve(TranslationPurpose.CHAPTER)
+                            val engine = resolved.engine
+                            if (!engine.isConfigured(resolved.config)) {
+                                executeReaderCommand(
+                                    readerCommand(
+                                        "replace.applyTranslation",
+                                        buildJsonObject {
+                                            put("original", text)
+                                            put("error", "Translation engine not configured")
+                                        },
+                                    ),
+                                )
+                                return@launch
+                            }
+                            val result = runCatching {
+                                engine.translate(
+                                    TranslationRequest(
+                                        texts = listOf(text),
+                                        sourceLanguage = "id",
+                                        targetLanguage = target,
+                                        config = resolved.config,
+                                    ),
+                                )
+                            }.getOrElse { TranslationResult.Error(it.message ?: "Translation failed") }
+                            when (result) {
+                                is TranslationResult.Success -> {
+                                    val translated = result.translatedTexts.firstOrNull()
+                                    if (translated != null) {
+                                        _translatedSelection.value = text to translated
+                                        executeReaderCommand(
+                                            readerCommand(
+                                                "replace.applyTranslation",
+                                                buildJsonObject {
+                                                    put("original", text)
+                                                    put("translated", translated)
+                                                },
+                                            ),
+                                        )
+                                    }
+                                }
+                                is TranslationResult.Error -> {
+                                    activity.toast("Translate gagal: ${result.message}")
+                                    executeReaderCommand(
+                                        readerCommand(
+                                            "replace.applyTranslation",
+                                            buildJsonObject {
+                                                put("original", text)
+                                                put("error", result.message)
+                                            },
+                                        ),
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
                 "media.playLocalVideo" -> launchLocalVideo(force = true)
                 "navigation.openNext" -> activity.loadNextChapter()
                 "navigation.previous" -> activity.loadPreviousChapter()
@@ -1152,7 +1238,6 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
             }
         }
     }
-
     private fun handleReaderRequest(name: String, payload: JsonObject, reply: (kotlinx.serialization.json.JsonElement?) -> Unit) {
         when (name) {
             "media.requestProtectedPlayback" -> {
@@ -1354,7 +1439,25 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
         if (activity.viewModel.reloadChapter(fromSource = shouldRetryFromSource(page))) showLoadingIndicator()
     }
 
+    private fun captureSelectionClipboard() {
+        try {
+            val cm = activity.getSystemService(android.content.ClipboardManager::class.java) ?: return
+            val clip = cm.primaryClip ?: return
+            if (clip.itemCount == 0) return
+            val text = clip.getItemAt(0).coerceToText(activity)?.toString()?.trim().orEmpty()
+            if (text.isNotEmpty() && text.length <= 500) {
+                eu.kanade.tachiyomi.ui.reader.replace.ReplaceHistory.push(text)
+            }
+        } catch (_: Throwable) {
+            // ignore
+        }
+    }
+
     private fun copyToClipboard(text: String) {
+        android.util.Log.d("NekoriCopy", "copyToClipboard called: len=" + text.length + " text=" + text)
+        if (text.isNotBlank()) {
+            eu.kanade.tachiyomi.ui.reader.replace.ReplaceHistory.push(text)
+        }
         val cm = activity.getSystemService(android.content.ClipboardManager::class.java)
         cm.setPrimaryClip(android.content.ClipData.newPlainText("error", text))
         activity.toast(activity.stringResource(TDMR.strings.novel_error_copied))
@@ -1609,6 +1712,14 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
             if (isInfiniteScrollEnabled() || isPagedLayoutEnabled()) styler.injectScopedChapterAnchors()
             styler.injectScrollTracking(isInfiniteScrollEnabled())
             styler.injectReaderUi()
+            if (lastOutlineVariantColor.isNotEmpty()) {
+                executeReaderCommand(
+                    readerCommand(
+                        "ui.setOutlineVariant",
+                        buildJsonObject { put("color", lastOutlineVariantColor) },
+                    ),
+                )
+            }
             restoreScrollPosition()
             if (isEditingMode) toggleEditMode(true)
         }
@@ -1640,6 +1751,14 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
         // A full reload replaces window, dropping the autoscroll rAF loop; re-arm it
         // on the new document so autoscroll survives a non-inf-scroll chapter change.
         if (isAutoScrolling && !isVideoChapter()) startAutoScroll()
+        lastReplaceStore?.let { st ->
+            lastReplaceColors?.let { cl ->
+                scope.launch {
+                    kotlinx.coroutines.delay(50)
+                    applyReplaceDecorations(st, cl)
+                }
+            }
+        }
     }
 
     /**
@@ -2294,6 +2413,7 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
                 buildJsonObject {
                     put("bionicEnabled", mode == "reader" && preferences.novelBionicReading.get())
                     put("ttsEnabled", mode == "reader" && isTtsEnabled)
+                    put("findReplaceEnabled", mode == "reader" && preferences.novelFindReplaceEnabled.get())
                     put(
                         "labels",
                         buildJsonObject {
@@ -2748,6 +2868,81 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
         webView.setFindListener(null)
     }
 
+    fun emitTranslateSelection(text: String) {
+        if (text.isBlank()) return
+        if (!webChapterContentReady) {
+            activity.toast("Chapter belum siap, coba lagi sebentar")
+            return
+        }
+        executeReaderCommand(
+            readerCommand(
+                "replace.emitTranslate",
+                buildJsonObject { put("text", text) },
+            ),
+        )
+    }
+
+    private var lastReplaceStore: ReplaceStore? = null
+    private var lastReplaceColors: ReplaceColors? = null
+
+    fun applyReplaceDecorations(store: ReplaceStore, colors: ReplaceColors) {
+        lastReplaceStore = store
+        lastReplaceColors = colors
+        val profile = store.activeProfile()
+        val profileJson = buildJsonObject {
+            put(
+                "fr",
+                kotlinx.serialization.json.buildJsonArray {
+                    profile.fr.forEach { entry ->
+                        add(
+                            buildJsonObject {
+                                put("find", entry.find)
+                                put("replace", entry.replace)
+                                put("enabled", entry.enabled)
+                            },
+                        )
+                    }
+                },
+            )
+            put(
+                "hl",
+                kotlinx.serialization.json.buildJsonArray {
+                    profile.hl.forEach { entry ->
+                        add(
+                            buildJsonObject {
+                                put("text", entry.text)
+                                put("type", entry.type.wire)
+                                put("enabled", entry.enabled)
+                            },
+                        )
+                    }
+                },
+            )
+        }
+        val colorsJson = buildJsonObject {
+            put("char", colors.char)
+            put("skill", colors.skill)
+            put("place", colors.place)
+            put("quote", colors.quote)
+            put("bracket", colors.bracket)
+            put("findActive", colors.findActive)
+            put("replaceText", colors.replaceText)
+        }
+        executeReaderCommand(
+            readerCommand(
+                "replace.applyDecorations",
+                buildJsonObject {
+                    put("profile", profileJson)
+                    put("colors", colorsJson)
+                },
+            ),
+        )
+    }
+
+    fun openReplaceHighlight() {
+        executeReaderCommand(readerCommand("replace.open"))
+    }
+
     private fun refreshFindInPage() {
         if (activeFindQuery.isNotEmpty()) {
             webView.findAllAsync(activeFindQuery)
@@ -2764,7 +2959,7 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
             }
             KeyEvent.KEYCODE_VOLUME_DOWN,
             KeyEvent.KEYCODE_VOLUME_UP,
-            -> {
+                -> {
                 if (!preferences.novelVolumeKeysScroll.get()) return false
                 if (!isUp) {
                     noteReadingInteraction()
@@ -3374,6 +3569,20 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
         styler.setTtsEnabled(enabled)
     }
 
+    private var lastOutlineVariantColor: String = ""
+
+    fun setOutlineVariantColor(colorHex: String) {
+        if (colorHex.isEmpty()) return
+        lastOutlineVariantColor = colorHex
+        if (!webChapterContentReady) return
+        executeReaderCommand(
+            readerCommand(
+                "ui.setOutlineVariant",
+                buildJsonObject { put("color", colorHex) },
+            ),
+        )
+    }
+
     fun startTts() {
         if (!isTtsEnabled) return
         resetReadingEndProof()
@@ -3622,6 +3831,10 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
         executeReaderCommand(NovelWebViewReadingCommands.clearSelection())
     }
 
+    fun clearReplaceSelection() {
+        _replaceSelection.value = ""
+    }
+
     /**
      * Handle the "Remember" action from text selection menu
      */
@@ -3683,3 +3896,5 @@ internal fun ReaderGestureTarget.tapAction(isVideoChapter: Boolean): ReaderTapAc
 
 /** Only the inert reader surface may become a chapter swipe; a seek drag must not change chapter. */
 internal fun ReaderGestureTarget.allowsChapterSwipe(): Boolean = this == ReaderGestureTarget.SURFACE
+
+

@@ -9,8 +9,11 @@ export const READER_COMMANDS = [
   'layout.finishTurn', 'tts.highlight', 'tts.clearHighlight', 'tts.extractText',
   'tts.firstVisibleParagraph', 'tts.taggedParagraph', 'selection.read', 'selection.readAnchor',
   'selection.clear', 'selection.blur', 'style.apply', 'ui.configure', 'ui.setTtsEnabled',
-  'ui.setBionic', 'ui.refresh', 'ui.configureNextChapter', 'scrollTracking.configure', 'anchors.install',
+  'ui.setBionic', 'ui.refresh', 'ui.configureNextChapter', 'ui.setOutlineVariant', 'scrollTracking.configure', 'anchors.install',
   'summary.focus', 'summary.render', 'summary.remove', 'feedback.show', 'feedback.clear', 'snippet.run',
+  'replace.applyDecorations',
+  'replace.emitTranslate',
+  'replace.applyTranslation',
 ] as const satisfies readonly ReaderCommandName[];
 
 export const READER_EVENTS = [
@@ -22,6 +25,7 @@ export const READER_EVENTS = [
   'navigation.openNext', 'navigation.previous', 'tts.start', 'tts.pause', 'tts.resume', 'tts.stop',
   'scroll.seekPercent', 'media.download.ready', 'media.download.progress', 'media.download.activity',
   'media.download.complete', 'media.download.error', 'reader.log',
+  'replace.status', 'replace.reloadChapter', 'replace.translateSelection', 'replace.selectionChanged',
 ] as const satisfies readonly ReaderEventName[];
 
 export function isReaderCommandName(value: string): value is ReaderCommandName {

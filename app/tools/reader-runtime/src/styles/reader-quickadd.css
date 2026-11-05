@@ -1,0 +1,125 @@
+.nk-quickadd {
+    --nk-bg: #fff;
+    --nk-fg: #000;
+    --nk-border: #ccc;
+    --nk-muted: #666;
+    --nk-row-bg: #f5f5f5;
+    --nk-accent: #6200ee;
+    --nk-on-accent: #fff;
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    font-family: system-ui;
+    font-size: 13px;
+    pointer-events: none;
+}
+.nk-quickadd[hidden] { display: none; }
+.nk-quickadd[data-nk-theme="dark"] {
+    --nk-bg: #1e1e1e;
+    --nk-fg: #eee;
+    --nk-border: #444;
+    --nk-muted: #aaa;
+    --nk-row-bg: #2a2a2a;
+}
+
+.nk-quickadd-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    pointer-events: auto;
+    animation: nk-qa-fade-in 180ms ease-out;
+}
+
+.nk-quickadd-sheet {
+    position: relative;
+    width: 100%;
+    max-height: 75vh;
+    background: var(--nk-bg);
+    color: var(--nk-fg);
+    border-top: 1px solid var(--nk-border);
+    border-radius: 28px 28px 0 0;
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.25);
+    padding: 10px 14px calc(14px + env(safe-area-inset-bottom, 0px));
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: auto;
+    animation: nk-qa-slide-up 220ms cubic-bezier(0.2, 0, 0, 1);
+    overflow-y: auto;
+}
+.nk-quickadd-sheet::before {
+    content: "";
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 32px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--nk-muted);
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+@keyframes nk-qa-slide-up {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+@keyframes nk-qa-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.nk-quickadd-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 6px;
+}
+.nk-quickadd-title { font-weight: 600; }
+.nk-quickadd-close {
+    border: none; background: transparent; color: var(--nk-fg);
+    font-size: 20px; line-height: 1; cursor: pointer;
+}
+
+.nk-quickadd-body {
+    display: flex; flex-direction: column; gap: 6px;
+}
+
+.nk-quickadd-input {
+    width: 100%; box-sizing: border-box;
+    padding: 8px 10px; font-size: 13px;
+    border: 1px solid var(--nk-border); border-radius: 8px;
+    background: var(--nk-row-bg); color: var(--nk-fg);
+}
+
+.nk-quickadd-chips { display: flex; gap: 4px; flex-wrap: wrap; }
+.nk-quickadd-chip {
+    padding: 4px 8px; border: 1px solid var(--nk-border);
+    border-radius: 999px; background: transparent;
+    color: var(--nk-fg); font-size: 11px; cursor: pointer;
+}
+.nk-quickadd-chip.active {
+    background: var(--nk-accent); color: var(--nk-on-accent);
+    border-color: transparent;
+}
+
+.nk-quickadd-actions {
+    display: flex; justify-content: flex-end; gap: 6px;
+}
+.nk-quickadd-btn {
+    padding: 6px 14px; border: 1px solid var(--nk-border);
+    border-radius: 8px; background: transparent;
+    color: var(--nk-fg); font-size: 13px; cursor: pointer;
+}
+.nk-quickadd-btn.primary {
+    background: var(--nk-accent); color: var(--nk-on-accent);
+    border-color: transparent;
+}
+
+.nk-quickadd input:focus,
+.nk-quickadd button:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}

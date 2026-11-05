@@ -754,6 +754,19 @@ internal fun ColumnScope.NovelAdvancedTab(
     ReaderSwitchItem(
         label = stringResource(TDMR.strings.pref_translation_replace_after_translation),
         pref = screenModel.preferences.novelRegexReplacementsAfterTranslation,
+        summary = stringResource(TDMR.strings.pref_novel_find_replace_note_upper),
+    )
+
+    ReaderSwitchItem(
+        label = stringResource(TDMR.strings.pref_novel_find_replace),
+        pref = screenModel.preferences.novelFindReplaceEnabled,
+        summary = stringResource(TDMR.strings.pref_novel_find_replace_note_lower),
+    )
+
+    ReaderSwitchItem(
+        label = stringResource(TDMR.strings.pref_novel_translate_floating),
+        pref = screenModel.preferences.novelTranslateFloating,
+        summary = stringResource(TDMR.strings.pref_novel_translate_floating_summary),
     )
 
     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))

@@ -1,3 +1,28 @@
+> [!WARNING]
+> **PERSONAL EXPERIMENTAL FORK**
+>
+> Personal fork of [Yuneko-dev/Nekori](https://github.com/Yuneko-dev/Nekori) with unreleased, experimental features. Expect bugs and breaking changes. Use the original repository for the stable version.
+
+---
+
+### New Features in This Fork
+
+* **Native Find & Replace & Highlight:** Jetpack Compose UI for Find & Replace entries, highlights, and color themes, accessible from the reader's bottom bar.
+* **Custom HSV Color Picker:** Built-in picker for highlight and text colors.
+* **JSON Import & Export:** Backup and restore Find & Replace profiles and color settings to `.json` via the system file picker.
+* **Native Selection Actions:** Selecting text shows F (Find), H (Highlight), and T (Translate) actions.
+* **Direct Selection Translation:** Highlight text and tap Translate to auto-translate (ID → EN) and pre-fill the Quick-Add form.
+* **Live Search & Compact UI:** Live search for large lists, compact layout without layout shifts.
+* **Replace History Auto-Capture:** Copied novel text is auto-added to the Replace history chips (max 10, in-memory).
+* **Color Palette Presets:** Rose, Amber, Cool, Fresh, and Warm palettes with gradient previews for highlight colors.
+* **New App Themes:** Claude (warm earthy) and Sakura (soft pastel pink).
+* **Reader Content Border:** 1dp `outlineVariant` border, 2dp radius, around the chapter area only — consistent with the Library/Updates/History frame.
+* **Reader Status Bar Border & Inset:** Status bar framed and width-matched to the reading area; content border lifts when the bar is at the bottom.
+* **Tap-to-Reveal Original Text:** Tap a Find & Replace result to show the original text inline, copyable with surrounding text; tap again to revert.
+* **Non-Circular Floating Buttons:** Translate FAB and selection action buttons use a 10dp rounded-square shape, inset 4dp from the content border.
+
+---
+
 <div align="center">
 
 <img src="./.github/assets/logo.png" alt="Nekori logo" title="Nekori logo" width="80"/>
@@ -23,7 +48,7 @@ A personal fork of [Tsundoku](https://github.com/tsundoku-otaku/tsundoku), built
 > This is a personal fork, made for my own use. It is not a community project and is not recommended for production
 > use. Expect breaking changes without notice.
 
-> [!NOTE]  
+> [!NOTE]
 > This fork uses AI slop.
 
 ## Download
@@ -45,7 +70,7 @@ what the app does, not what this fork added. For the fork's own changes, see
 
 **Sources**
 
-* LNReader plugins, run by a headless React Native + Hermes runtime, against standard `fetch`.
+* LNReader plugins, run by a headless React Native + Hermes runtime, against stkamurd `fetch`.
 * Plugins share the app's user agent and cookie jar, so logins and Cloudflare clearances carry over.
 * Install, update and remove plugins from repositories, with plugin details and install state.
 * Local reading of content, including EPUB, TXT and HTML.

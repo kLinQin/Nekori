@@ -371,8 +371,44 @@ object SettingsDataScreen : SearchableSettings {
                     preference = libraryPreferences.autoClearChapterCache,
                     title = stringResource(MR.strings.pref_auto_clear_chapter_cache),
                 ),
+                Preference.PreferenceItem.TextPreference(
+                    title = "Find & Replace storage",
+                    subtitle = getReplaceStorageSizeLabel(),
+                    onClick = {
+                        try {
+                            val ps = Injekt.get<tachiyomi.core.common.preference.PreferenceStore>()
+                            ps.getString("nekori_replace_store_v1", "").set("")
+                            ps.getString("nekori_replace_colors_v1", "").set("")
+                            context.toast("Find & Replace data cleared")
+                            cacheReadableSizeSema++
+                        } catch (e: Throwable) {
+                            logcat(LogPriority.ERROR, e)
+                            context.toast("Failed to clear Find & Replace data")
+                        }
+                    },
+                ),
             ),
         )
+    }
+
+    @Composable
+    private fun getReplaceStorageSizeLabel(): String {
+        val sema = 0 // recompose trigger via parent; simple static read
+        return remember(sema) {
+            try {
+                val ps = Injekt.get<tachiyomi.core.common.preference.PreferenceStore>()
+                val a = ps.getString("nekori_replace_store_v1", "").get()
+                val b = ps.getString("nekori_replace_colors_v1", "").get()
+                val total = a.length + b.length
+                when {
+                    total < 1024 -> "$total B"
+                    total < 1024 * 1024 -> "%.1f KB".format(total / 1024.0)
+                    else -> "%.2f MB".format(total / (1024.0 * 1024.0))
+                }
+            } catch (e: Throwable) {
+                "-"
+            }
+        }
     }
 
     @Composable

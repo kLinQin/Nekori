@@ -12,11 +12,20 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <FrameLayout
-                android:id="@+id/viewer_container"
+            <eu.kanade.tachiyomi.ui.reader.ReaderBorderedFrameLayout
+                android:id="@+id/reader_border"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:descendantFocusability="blocksDescendants" />
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="4dp">
+
+                <FrameLayout
+                    android:id="@+id/viewer_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:descendantFocusability="blocksDescendants" />
+
+            </eu.kanade.tachiyomi.ui.reader.ReaderBorderedFrameLayout>
 
         </FrameLayout>
 

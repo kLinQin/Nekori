@@ -1,0 +1,317 @@
+.nk-replace-drawer {
+    --nk-bg: #fff;
+    --nk-fg: #000;
+    --nk-border: #ccc;
+    --nk-muted: #666;
+    --nk-row-bg: #f5f5f5;
+    --nk-accent: #6200ee;
+    --nk-on-accent: #fff;
+    --nk-error: #b00020;
+
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: auto;
+    max-height: 75vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--nk-bg);
+    color: var(--nk-fg);
+    border-top: 1px solid var(--nk-border);
+    border-radius: 28px 28px 0 0;
+    z-index: 1000;
+    font-family: system-ui;
+    font-size: 13px;
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    padding-top: 10px;
+    animation: nk-slide-up 220ms cubic-bezier(0.2, 0, 0, 1);
+}
+.nk-replace-drawer::before {
+    content: "";
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 32px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--nk-muted);
+    opacity: 0.4;
+    pointer-events: none;
+}
+.nk-replace-drawer[data-nk-theme="dark"] {
+    --nk-bg: #1e1e1e;
+    --nk-fg: #eee;
+    --nk-border: #444;
+    --nk-muted: #aaa;
+    --nk-row-bg: #2a2a2a;
+    --nk-error: #ff6b6b;
+}
+.nk-replace-drawer[hidden] { display: none; }
+
+@keyframes nk-slide-up {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+.nk-replace-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    animation: nk-fade-in 180ms ease-out;
+}
+.nk-replace-backdrop[hidden] { display: none; }
+
+@keyframes nk-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.nk-replace-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 10px 6px;
+    border-bottom: 1px solid var(--nk-border);
+    flex: 0 0 auto;
+}
+.nk-replace-title { font-weight: 600; }
+.nk-replace-close {
+    border: none; background: transparent; font-size: 20px; line-height: 1;
+    cursor: pointer; color: var(--nk-fg);
+}
+
+.nk-replace-tabs {
+    display: flex; border-bottom: 1px solid var(--nk-border);
+    overflow-x: auto; flex: 0 0 auto;
+}
+.nk-replace-tab {
+    flex: 1; padding: 8px; background: transparent; border: none;
+    border-bottom: 2px solid transparent; cursor: pointer;
+    color: var(--nk-fg); font-size: 12px; white-space: nowrap;
+}
+.nk-replace-tab.active {
+    border-bottom-color: var(--nk-accent); font-weight: 600;
+}
+
+.nk-replace-body {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden;
+}
+
+.nk-replace-profiles {
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 10px; border-bottom: 1px solid var(--nk-border);
+    flex-wrap: wrap; flex: 0 0 auto; color: var(--nk-fg);
+}
+
+.nk-replace-tab-body {
+    flex: 1; min-height: 0; display: flex; flex-direction: column;
+    padding: 6px 10px; gap: 6px; overflow: hidden;
+}
+
+.nk-replace-add-row {
+    display: flex; gap: 6px; align-items: center;
+    flex-wrap: wrap; flex: 0 0 auto;
+}
+
+.nk-replace-input, .nk-replace-select, .nk-replace-hex {
+    flex: 1; min-width: 80px; padding: 5px 8px; font-size: 12px;
+    border: 1px solid var(--nk-border); border-radius: 4px;
+    background: var(--nk-row-bg); color: var(--nk-fg);
+}
+.nk-replace-input::placeholder { color: var(--nk-muted); }
+
+.nk-replace-chips { display: flex; gap: 4px; flex: 0 0 auto; }
+.nk-replace-chip {
+    padding: 4px 8px; border: 1px solid var(--nk-border);
+    border-radius: 999px; background: transparent; cursor: pointer;
+    font-size: 11px; color: var(--nk-fg);
+}
+.nk-replace-chip.active {
+    background: var(--nk-accent); color: var(--nk-on-accent); border-color: transparent;
+}
+
+.nk-replace-btn {
+    padding: 5px 10px; border: 1px solid var(--nk-border);
+    border-radius: 4px; background: transparent; cursor: pointer;
+    font-size: 12px; color: var(--nk-fg);
+}
+.nk-replace-btn.primary {
+    background: var(--nk-accent); color: var(--nk-on-accent); border-color: transparent;
+}
+.nk-replace-btn.danger {
+    background: transparent; color: var(--nk-error); border-color: var(--nk-error);
+}
+
+.nk-replace-list {
+    flex: 1; min-height: 0; overflow-y: auto;
+    border: 1px solid var(--nk-border); border-radius: 4px;
+    padding: 4px; display: flex; flex-direction: column; gap: 4px;
+}
+
+.nk-replace-row {
+    display: flex; gap: 4px; align-items: center; padding: 4px;
+    background: var(--nk-row-bg); border-radius: 4px;
+    cursor: grab; color: var(--nk-fg);
+}
+.nk-replace-row.dragging { opacity: 0.5; }
+.nk-replace-row.drag-over { outline: 2px dashed var(--nk-accent); }
+.nk-replace-row input[type="checkbox"] { flex: 0 0 auto; }
+.nk-replace-row .nk-replace-input { flex: 1 1 0; }
+
+.nk-replace-footer {
+    display: flex; justify-content: flex-end; gap: 6px;
+    padding: 6px 10px; border-top: 1px solid var(--nk-border); flex: 0 0 auto;
+}
+
+.nk-replace-color-row {
+    display: flex; align-items: center; gap: 8px; padding: 4px 0;
+}
+.nk-replace-color-label { flex: 1; color: var(--nk-fg); }
+.nk-replace-color-swatch {
+    width: 36px; height: 28px; border-radius: 4px;
+    border: 1px solid var(--nk-border); cursor: pointer; padding: 0;
+}
+
+.nk-replace-json-bar { display: flex; gap: 6px; flex-wrap: wrap; flex: 0 0 auto; }
+.nk-replace-json {
+    flex: 1 1 auto; width: 100%; min-height: 0; padding: 6px 8px; box-sizing: border-box;
+    font-family: ui-monospace, monospace; font-size: 11px;
+    border: 1px solid var(--nk-border); border-radius: 4px;
+    background: var(--nk-row-bg); color: var(--nk-fg); resize: none;
+}
+.nk-replace-msg { min-height: 1em; font-size: 11px; color: var(--nk-error); flex: 0 0 auto; }
+
+/* Highlight warna (non-destruktif, dipasang via engine) */
+.nk-hl { color: var(--nk-color-char, #FB7185); background: transparent; }
+.nk-hl[data-nk-hl="char"] { color: var(--nk-color-char, #FB7185); }
+.nk-hl[data-nk-hl="skill"] { color: var(--nk-color-skill, #E879F9); }
+.nk-hl[data-nk-hl="place"] { color: var(--nk-color-place, #5EEAD4); }
+.nk-quote { color: var(--nk-color-quote, #FDBA74); background: transparent; }
+.nk-bracket { color: var(--nk-color-bracket, #818CF8); background: transparent; }
+.nk-replace { color: var(--nk-color-replace, #38BDF8); }
+
+/* Custom color picker popover (HSV) */
+.nk-color-popover {
+    position: fixed; z-index: 1100; padding: 10px;
+    background: var(--nk-bg, #fff); color: var(--nk-fg, #000);
+    border: 1px solid var(--nk-border, #ccc); border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    display: flex; flex-direction: column; gap: 10px; width: 240px;
+}
+.nk-color-popover[hidden] { display: none; }
+
+.nk-color-sv {
+    position: relative; width: 100%; height: 140px;
+    border-radius: 6px; cursor: crosshair;
+    touch-action: none;
+    border: 1px solid var(--nk-border, #ccc);
+    background: linear-gradient(to top, #000, transparent),
+                linear-gradient(to right, #fff, red);
+}
+.nk-color-sv-thumb {
+    position: absolute; width: 12px; height: 12px;
+    border-radius: 50%; border: 2px solid #fff;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    top: 0; left: 100%;
+}
+
+.nk-color-hue {
+    position: relative; width: 100%; height: 20px;
+    border-radius: 6px; cursor: pointer;
+    touch-action: none;
+    border: 1px solid var(--nk-border, #ccc);
+    background: linear-gradient(to right,
+        #ff0000 0%, #ffff00 16.66%, #00ff00 33.33%,
+        #00ffff 50%, #0000ff 66.66%, #ff00ff 83.33%, #ff0000 100%);
+}
+.nk-color-hue-thumb {
+    position: absolute; width: 12px; height: 20px;
+    background: #fff; border: 2px solid #000;
+    border-radius: 4px;
+    transform: translateX(-50%);
+    pointer-events: none;
+    top: 0; left: 0;
+}
+
+.nk-color-hex-row { display: flex; gap: 6px; align-items: center; }
+.nk-color-preview {
+    width: 32px; height: 28px; border-radius: 6px;
+    border: 1px solid var(--nk-border, #ccc);
+    flex: 0 0 auto;
+}
+.nk-color-hex-row input {
+    flex: 1; padding: 4px 6px; border: 1px solid var(--nk-border, #ccc);
+    border-radius: 4px; background: var(--nk-row-bg, #fafafa);
+    color: var(--nk-fg, #000); font-family: ui-monospace, monospace; font-size: 12px;
+}
+.nk-color-actions { display: flex; justify-content: flex-end; gap: 6px; }
+
+/* Focus: hilangkan outline/ring */
+.nk-replace-drawer input:focus,
+.nk-replace-drawer textarea:focus,
+.nk-replace-drawer button:focus,
+.nk-replace-drawer select:focus,
+.nk-quickadd input:focus,
+.nk-quickadd button:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Tab JSON: samakan tinggi & beri ruang kanan */
+.nk-replace-tab-body .nk-replace-json {
+    flex: 1 1 auto;
+    margin: 0;
+}
+.nk-replace-tab-body .nk-replace-json-bar {
+    flex: 0 0 auto;
+}
+
+.nk-dropdown { position: relative; display: inline-block; min-width: 80px; }
+.nk-dropdown-btn {
+    width: 100%; padding: 5px 8px; font-size: 12px; text-align: left;
+    border: 1px solid var(--nk-border); border-radius: 4px;
+    background: var(--nk-row-bg); color: var(--nk-fg); cursor: pointer;
+}
+.nk-dropdown-btn::after { content: " \25BE"; float: right; opacity: 0.6; }
+.nk-dropdown-menu {
+    display: flex; flex-direction: column; max-height: 40vh; overflow-y: auto;
+    background: var(--nk-bg, #fff); color: var(--nk-fg, #000);
+    border: 1px solid var(--nk-border, #ccc); border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+.nk-dropdown-item {
+    padding: 8px 10px; font-size: 12px; text-align: left;
+    border: none; background: transparent; color: inherit; cursor: pointer;
+}
+.nk-dropdown-item:hover, .nk-dropdown-item.active {
+    background: var(--nk-accent, #6200ee); color: var(--nk-on-accent, #fff);
+}
+
+/* JSON tab override — pakai class eksplisit (tanpa :has(), aman di WebView lama) */
+.nk-replace-tab-json {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 0;
+    overflow: hidden;
+    padding-right: 10px;
+}
+.nk-replace-tab-json .nk-replace-json-bar {
+    flex: 0 0 auto;
+}
+.nk-replace-tab-json .nk-replace-json {
+    flex: 1 1 auto;
+    min-height: 120px;
+    max-height: none;
+    height: auto;
+    resize: none;
+}
+.nk-replace-tab-json .nk-replace-msg {
+    flex: 0 0 auto;
+}
