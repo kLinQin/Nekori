@@ -57,6 +57,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -159,6 +160,7 @@ import java.io.ByteArrayOutputStream
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.seconds
 import androidx.compose.foundation.border
+import androidx.compose.ui.draw.alpha
 import androidx.compose.foundation.layout.offset
 import androidx.compose.ui.graphics.Color as ComposeColor
 import androidx.compose.ui.graphics.toArgb
@@ -1397,7 +1399,71 @@ class ReaderActivity : BaseActivity() {
                 ttsOverlayBottomPadding = ttsOverlayBottomPadding,
             )
 
-            if (translateFloating && replaceSelection.isBlank()) {
+            if (translateFloating) {
+                val chromeVisible = state.menuVisible || findInPageState != null
+                val localDensity = androidx.compose.ui.platform.LocalDensity.current
+                val bottomBarHeightPx = with(localDensity) { 80.dp.roundToPx() }
+                val frameInnerGapPx = with(localDensity) { 4.dp.roundToPx() }
+
+                var frameBottomFromOverlayPx by remember { mutableIntStateOf(0) }
+                var frameEndFromOverlayPx by remember { mutableIntStateOf(0) }
+
+                androidx.compose.runtime.DisposableEffect(Unit) {
+                    val borderView = binding.readerBorder
+                    val overlayView = binding.composeOverlay
+                    fun measure() {
+                        val borderLoc = IntArray(2)
+                        val overlayLoc = IntArray(2)
+                        borderView.getLocationInWindow(borderLoc)
+                        overlayView.getLocationInWindow(overlayLoc)
+                        val borderBottomInWindow = borderLoc[1] + borderView.height - borderView.paddingBottom
+                        val borderEndInWindow = borderLoc[0] + borderView.width - borderView.paddingRight
+                        val overlayBottom = overlayLoc[1] + overlayView.height
+                        val overlayEnd = overlayLoc[0] + overlayView.width
+                        frameBottomFromOverlayPx = (overlayBottom - borderBottomInWindow).coerceAtLeast(0)
+                        frameEndFromOverlayPx = (overlayEnd - borderEndInWindow).coerceAtLeast(0)
+                    }
+                    val listener = object : android.view.View.OnLayoutChangeListener {
+                        override fun onLayoutChange(
+                            v: android.view.View,
+                            left: Int,
+                            top: Int,
+                            right: Int,
+                            bottom: Int,
+                            oldLeft: Int,
+                            oldTop: Int,
+                            oldRight: Int,
+                            oldBottom: Int,
+                        ) = measure()
+                    }
+                    borderView.addOnLayoutChangeListener(listener)
+                    overlayView.addOnLayoutChangeListener(listener)
+                    borderView.post { measure() }
+                    object : androidx.compose.runtime.DisposableEffectResult {
+                        override fun dispose() {
+                            borderView.removeOnLayoutChangeListener(listener)
+                            overlayView.removeOnLayoutChangeListener(listener)
+                        }
+                    }
+                }
+
+                val hideExtraPx = with(localDensity) { 27.dp.roundToPx() }
+                val showGapPx = with(localDensity) { 17.dp.roundToPx() }
+                val bottomDp = with(localDensity) {
+                    if (chromeVisible) {
+                        (bottomBarHeightPx + showGapPx).toDp()
+                    } else {
+                        (frameBottomFromOverlayPx + frameInnerGapPx + hideExtraPx).toDp()
+                    }
+                }
+                val endDp = with(localDensity) {
+                    (frameEndFromOverlayPx + frameInnerGapPx).toDp()
+                }
+                val translateButtonBottom by androidx.compose.animation.core.animateDpAsState(
+                    targetValue = bottomDp,
+                    label = "translateButtonBottom",
+                )
+                val translateVisible = replaceSelection.isBlank()
                 androidx.compose.foundation.layout.Box(
                     modifier = Modifier.fillMaxSize(),
                 ) {
@@ -1405,8 +1471,10 @@ class ReaderActivity : BaseActivity() {
                         onClick = { viewModel.toggleTranslation() },
                         shape = androidx.compose.foundation.shape.RoundedCornerShape(10.dp),
                         modifier = Modifier
-                            .align(androidx.compose.ui.Alignment.CenterEnd)
-                            .padding(end = 12.dp),
+                            .align(androidx.compose.ui.Alignment.BottomEnd)
+                            .padding(end = endDp, bottom = translateButtonBottom)
+                            .alpha(if (translateVisible) 1f else 0f),
+                        enabled = translateVisible,
                     ) {
                         androidx.compose.material3.Icon(
                             Icons.Outlined.Translate,
