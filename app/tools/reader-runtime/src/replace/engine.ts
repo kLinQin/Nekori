@@ -5,16 +5,19 @@ const HIGHLIGHT_CLASS = 'nk-hl';
 const HIGHLIGHT_TYPE_ATTR = 'data-nk-hl';
 const REPLACE_CLASS = 'nk-replace';
 const QUOTE_CLASS = 'nk-quote';
+const QUOTE_INNER_CLASS = 'nk-quote-inner';
 const BRACKET_CLASS = 'nk-bracket';
 const ORIGINAL_ATTR = 'data-nk-original';
 
 const QUOTE_PATTERNS: RegExp[] = [
-  /\u201C[^\u201D\n]{10,}\u201D/g,
-  /\u201E[^\u201C\n]{10,}\u201C/g,
-  /\u2018[^\u2019\n]{10,}\u2019/g,
-  /"[^"\n]{10,}"/g,
-  /\u00AB[^\u00BB\n]{10,}\u00BB/g,
-  /`[^`\n]{10,}`/g,
+  /\u201C[\s\S]{1,}?\u201D/g,
+  /\u201E[\s\S]{1,}?\u201C/g,
+  /(?<![\p{L}\p{N}])\u2018[\s\S]{1,}?\u2019(?![\p{L}\p{N}])/gu,
+  /(?<![\p{L}\p{N}])\u2019[\s\S]{1,}?\u2019(?![\p{L}\p{N}])/gu,
+  /(?<![\p{L}\p{N}])'[\s\S]{10,}?'(?![\p{L}\p{N}])/gu,
+  /"[\s\S]{1,}?"/g,
+  /\u00AB[\s\S]{1,}?\u00BB/g,
+  /`[\s\S]{1,}?`/g,
 ];
 const BRACKET_PATTERN = /\[[^[\]\n]{1,200}\]/g;
 
@@ -203,6 +206,40 @@ export function runDecorations(root: HTMLElement, profile: ReplaceStore['list'][
     let n = walker.nextNode();
     while (n) { nodes.push(n as Text); n = walker.nextNode(); }
     for (const node of nodes) processNode(chapter.ownerDocument, node, frActive, hlActive);
+  }
+
+  for (const chapter of getReaderChapters(root)) {
+    for (const span of Array.from(chapter.querySelectorAll('.' + QUOTE_CLASS))) {
+      if (span.querySelector('.' + QUOTE_INNER_CLASS)) continue;
+      const text = span.textContent ?? '';
+      if (!text) continue;
+      let changed = false;
+      const wrapper = span.ownerDocument.createElement('span');
+      let last = 0;
+      for (const pattern of QUOTE_PATTERNS) {
+        pattern.lastIndex = 0;
+        let m: RegExpExecArray | null;
+        while ((m = pattern.exec(text)) !== null) {
+          if (m.index <= 0) continue;
+          if (m.index + m[0].length >= text.length) continue;
+          if (m.index > last) {
+            wrapper.appendChild(span.ownerDocument.createTextNode(text.slice(last, m.index)));
+          }
+          const inner = span.ownerDocument.createElement('span');
+          inner.className = QUOTE_INNER_CLASS;
+          inner.textContent = m[0];
+          wrapper.appendChild(inner);
+          last = m.index + m[0].length;
+          changed = true;
+          if (m[0].length === 0) pattern.lastIndex++;
+        }
+      }
+      if (!changed) continue;
+      if (last < text.length) {
+        wrapper.appendChild(span.ownerDocument.createTextNode(text.slice(last)));
+      }
+      span.replaceChildren(...Array.from(wrapper.childNodes));
+    }
   }
 
   // Apply warna via CSS vars di root, supaya CSS reader-replace.css bisa pakai var.

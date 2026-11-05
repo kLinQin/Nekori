@@ -309,6 +309,7 @@ class ReaderPreferences(
 
     // Auto-split text after X words until punctuation mark (0 = disabled)
     val novelAutoSplitText: Preference<Boolean> = preferenceStore.getBoolean("pref_novel_auto_split_text", false)
+    val novelQuoteCalloutEnabled: Preference<Boolean> = preferenceStore.getBoolean("pref_novel_quote_callout", true)
     val novelAutoSplitWordCount: Preference<Int> = preferenceStore.getInt("pref_novel_auto_split_word_count", 50)
 
     // Use source's original fonts (don't force a specific font family)

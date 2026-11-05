@@ -190,7 +190,29 @@
 .nk-hl[data-nk-hl="char"] { color: var(--nk-color-char, #FB7185); }
 .nk-hl[data-nk-hl="skill"] { color: var(--nk-color-skill, #E879F9); }
 .nk-hl[data-nk-hl="place"] { color: var(--nk-color-place, #5EEAD4); }
-.nk-quote { color: var(--nk-color-quote, #FDBA74); background: transparent; }
+.nk-quote {
+    display: inline;
+    color: var(--nk-color-quote, #FDBA74);
+    background: transparent;
+}
+body.quote-callout-on .nk-quote {
+    display: block;
+    padding: 8px 12px;
+    border-left: 2px solid var(--nk-color-quote, #FDBA74);
+    background: color-mix(in srgb, var(--nk-color-quote, #FDBA74) 10%, transparent);
+    border-radius: 4px;
+    line-height: var(--reader-line-height);
+    margin-block-start: var(--reader-paragraph-spacing);
+    margin-block-end: var(--reader-paragraph-spacing);
+}
+.nk-quote-inner {
+    display: inline;
+    color: var(--nk-color-quote, #FDBA74);
+    background: transparent;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+}
 .nk-bracket { color: var(--nk-color-bracket, #818CF8); background: transparent; }
 .nk-replace { color: var(--nk-color-replace, #38BDF8); }
 

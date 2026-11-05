@@ -137,6 +137,7 @@ internal class NovelWebViewStyler(
                 }
                 if (!preferences.novelSourceCssPriority.get()) add("nekori-reader-force-style")
                 if (useOriginalFonts) add("nekori-reader-original-font")
+                if (preferences.novelQuoteCalloutEnabled.get()) add("quote-callout-on")
             }.joinToString(" "),
             backgroundColor = finalBgColor,
             backgroundConfig = background.configJson(),

@@ -315,6 +315,8 @@
     <string name="novel_chapter_display_number">Number</string>
     <string name="novel_chapter_display_both">Both</string>
     <string name="novel_auto_split">Auto-split long chapters</string>
+    <string name="pref_novel_quote_callout">Quote callout style</string>
+    <string name="pref_novel_quote_callout_summary">Display quoted text as a callout box; turn off for inline quote coloring</string>
     <string name="novel_split_word_count">Split word count (×50)</string>
     <string name="novel_force_lowercase">Force text to lowercase</string>
     <string name="novel_no_snippets">No snippets added</string>

@@ -43,6 +43,7 @@ internal class NovelWebViewPreferenceObserver(
                 preferences.novelHideChapterTitle.changes().drop(1),
                 preferences.novelTextSelectable.changes().drop(1),
                 preferences.novelBionicReading.changes().drop(1),
+                preferences.novelQuoteCalloutEnabled.changes().drop(1),
             ).debounce(STYLE_DEBOUNCE_MS).collect { onStyleChanged() }
         }
 

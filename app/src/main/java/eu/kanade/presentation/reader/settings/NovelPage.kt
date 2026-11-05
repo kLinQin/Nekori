@@ -225,6 +225,13 @@ internal fun ColumnScope.NovelReadingTab(screenModel: ReaderSettingsViewModel) {
 
     HorizontalDivider()
 
+    // Quote callout style
+    ReaderSwitchItem(
+        label = stringResource(TDMR.strings.pref_novel_quote_callout),
+        pref = screenModel.preferences.novelQuoteCalloutEnabled,
+        summary = stringResource(TDMR.strings.pref_novel_quote_callout_summary),
+    )
+
     // Auto-split paragraphs
     ReaderSwitchItem(
         label = stringResource(TDMR.strings.novel_auto_split),
