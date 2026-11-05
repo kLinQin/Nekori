@@ -9,7 +9,7 @@ export const READER_COMMANDS = [
   'layout.finishTurn', 'tts.highlight', 'tts.clearHighlight', 'tts.extractText',
   'tts.firstVisibleParagraph', 'tts.taggedParagraph', 'selection.read', 'selection.readAnchor',
   'selection.clear', 'selection.blur', 'style.apply', 'ui.configure', 'ui.setTtsEnabled',
-  'ui.setBionic', 'ui.refresh', 'ui.configureNextChapter', 'scrollTracking.configure', 'anchors.install',
+  'ui.setBionic', 'ui.refresh', 'ui.configureNextChapter', 'ui.setOutlineVariant', 'scrollTracking.configure', 'anchors.install',
   'summary.focus', 'summary.render', 'summary.remove', 'feedback.show', 'feedback.clear', 'snippet.run',
   'replace.applyDecorations',
   'replace.emitTranslate',

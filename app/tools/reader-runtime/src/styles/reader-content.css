@@ -71,8 +71,7 @@ td {
     margin-inline-start: var(--reader-margin-inline-start);
     margin-inline-end: var(--reader-margin-inline-end);
     border-width: 0;
-    border-radius: 50px;
-    background-color: var(--md-sys-color-primary);
+    border-radius: 6px;
     font-family: var(--reader-font-family);
     font-size: 16px;
     user-select: none;
@@ -80,12 +79,19 @@ td {
 
 .next-button {
     width: calc(100% - var(--reader-margin-left) - var(--reader-margin-right));
-    min-height: 40px;
+    min-height: 42px;
     padding: 0 16px;
     overflow: hidden;
-    color: var(--md-sys-color-on-primary);
+    border: 1px solid var(--nk-outline-variant, color-mix(in srgb, var(--reader-text-color) 30%, transparent));
+    border-radius: 6px;
+    background-color: color-mix(in srgb, var(--reader-text-color) 8%, var(--reader-background-color));
+    color: var(--reader-text-color);
     text-overflow: ellipsis;
     white-space: nowrap;
+    font-weight: 600;
+}
+.next-button:active {
+    background-color: color-mix(in srgb, var(--reader-text-color) 16%, var(--reader-background-color));
 }
 
 .local-video-button {
@@ -112,6 +118,20 @@ td {
     color: inherit;
     background-color: transparent;
     text-align: center;
+}
+
+#nekori-next-chapter {
+    margin: 24px var(--reader-margin-inline-end) 24px var(--reader-margin-inline-start);
+    color: var(--reader-text-color);
+}
+
+#nekori-next-chapter .info-text {
+    padding-top: 4px;
+    padding-bottom: 4px;
+    margin-inline: 0;
+    border-radius: 0;
+    background-color: transparent;
+    color: inherit;
 }
 
 .d-none {

@@ -25,12 +25,22 @@ export function registerNextChapterCommand(host: ReaderHost): Unsubscribe {
     }
     (document.getElementById('reader-ui') ?? document.body).append(container);
   };
-  return host.onCommand('ui.configureNextChapter', (value) => {
+  const unsubOutline = host.onCommand('ui.setOutlineVariant', (value) => {
+    if (!isRecord(value) || typeof value.color !== 'string' || value.color.length === 0) {
+      throw new TypeError('Invalid outlineVariant color');
+    }
+    host.root.ownerDocument.documentElement.style.setProperty('--nk-outline-variant', value.color);
+  });
+  const unsubNext = host.onCommand('ui.configureNextChapter', (value) => {
     if (!isRecord(value) || typeof value.hasNext !== 'boolean' || typeof value.finishedText !== 'string' || typeof value.nextText !== 'string' ||
         typeof value.noNextText !== 'string') throw new TypeError('Invalid next chapter labels');
     labels = { hasNext: value.hasNext, finishedText: value.finishedText, nextText: value.nextText, noNextText: value.noNextText };
     render();
   });
+  return () => {
+    unsubOutline();
+    unsubNext();
+  };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

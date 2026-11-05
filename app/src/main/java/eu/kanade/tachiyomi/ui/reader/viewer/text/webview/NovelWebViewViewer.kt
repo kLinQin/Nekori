@@ -1712,6 +1712,14 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
             if (isInfiniteScrollEnabled() || isPagedLayoutEnabled()) styler.injectScopedChapterAnchors()
             styler.injectScrollTracking(isInfiniteScrollEnabled())
             styler.injectReaderUi()
+            if (lastOutlineVariantColor.isNotEmpty()) {
+                executeReaderCommand(
+                    readerCommand(
+                        "ui.setOutlineVariant",
+                        buildJsonObject { put("color", lastOutlineVariantColor) },
+                    ),
+                )
+            }
             restoreScrollPosition()
             if (isEditingMode) toggleEditMode(true)
         }
@@ -3559,6 +3567,20 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
     fun setTtsEnabled(enabled: Boolean) {
         if (!enabled && isTtsActive()) stopTts(preserveChapterLoad = true)
         styler.setTtsEnabled(enabled)
+    }
+
+    private var lastOutlineVariantColor: String = ""
+
+    fun setOutlineVariantColor(colorHex: String) {
+        if (colorHex.isEmpty()) return
+        lastOutlineVariantColor = colorHex
+        if (!webChapterContentReady) return
+        executeReaderCommand(
+            readerCommand(
+                "ui.setOutlineVariant",
+                buildJsonObject { put("color", colorHex) },
+            ),
+        )
     }
 
     fun startTts() {

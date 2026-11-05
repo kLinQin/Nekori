@@ -655,8 +655,11 @@ class ReaderActivity : BaseActivity() {
             }
 
             val borderColor = androidx.compose.material3.MaterialTheme.colorScheme.outlineVariant
-            LaunchedEffect(borderColor) {
+            LaunchedEffect(borderColor, state.viewer) {
                 binding.readerBorder.setBorderColorFromTheme(borderColor.toArgb())
+                val argb = borderColor.toArgb()
+                val hex = "#%06X".format(argb and 0xFFFFFF)
+                (state.viewer as? NovelWebViewViewer)?.setOutlineVariantColor(hex)
             }
 
             // Border bawah jangan tertutup status bar reader (posisi bawah, bukan custom background).
