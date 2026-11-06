@@ -30,7 +30,7 @@
 # Egg [App](#)
 
 ### Novel reader for LNReader plugins
-A personal fork of [Tsundoku](https://github.com/tsundoku-otaku/tsundoku), built around the LNReader plugin ecosystem.
+A personal fork of [Nekori](https://github.com/Yuneko-dev/Nekori), itself a fork of [Tsundoku](https://github.com/tsundoku-otaku/tsundoku), built around the LNReader plugin ecosystem.
 
 [![GitHub downloads](https://img.shields.io/github/downloads/kLinQin/Nekori/total?label=downloads&labelColor=27303D&color=0D1117&logo=github&logoColor=FFFFFF&style=flat)](https://github.com/kLinQin/Nekori/releases)
 [![CI](https://img.shields.io/github/actions/workflow/status/kLinQin/Nekori/build.yml?labelColor=27303D)](https://github.com/kLinQin/Nekori/actions/workflows/build.yml)
@@ -120,18 +120,17 @@ what the app does, not what this fork added. For the fork's own changes, see
 
 </div>
 
-## Differences from Tsundoku
+## Differences from Nekori
 
-Tsundoku is a Mihon fork that added novel support while keeping the manga side intact. Egg drops that side entirely:
+Nekori is a Tsundoku fork that added a headless plugin runtime, native Find & Replace, translation, and themes. Egg keeps that base and narrows it further:
 
 * The manga page viewer, the native image decoder and the Fresco stack are gone.
 * Kotlin extension discovery and the Shizuku extension installer are gone.
 * Firebase configuration is gone, and release telemetry is disabled.
 * React Native is the plugin runtime only — the reader itself is a native WebView plus Compose.
+* Application id is `app.egg.novel`, separate from Nekori's `app.yuneko.nekori`.
 
-Everything else stays. The library, categories, trackers, themes, backups, downloads, statistics and the whole
-settings surface are Tsundoku's, and Egg follows upstream rather than diverging from it — this fork is a narrowing,
-not a rewrite.
+Everything else is Nekori's. The library, categories, trackers, themes, backups, downloads, statistics, the Find & Replace and translation surfaces, and the whole settings screen stay as they are. Egg follows Nekori rather than diverging from it — this fork is a narrowing, not a rewrite.
 
 The full list lives in [NEKORI_CHANGELOG.md](./NEKORI_CHANGELOG.md). [CHANGELOG.md](./CHANGELOG.md) is Tsundoku's own
 release record and is kept identical to upstream so it merges cleanly.
@@ -158,7 +157,8 @@ Egg exists because of work done elsewhere:
 
 * [Mihon](https://github.com/mihonapp/mihon) and [Tachiyomi](https://github.com/tachiyomiorg/tachiyomi) — the app this
   is descended from.
-* [Tsundoku](https://github.com/tsundoku-otaku/tsundoku) — the novel support this fork is built on.
+* [Tsundoku](https://github.com/tsundoku-otaku/tsundoku) — the novel support this lineage is built on.
+* [Nekori](https://github.com/Yuneko-dev/Nekori) — the direct parent fork, with the plugin runtime, native Find & Replace, translation and themes that Egg inherits.
 * [LNReader](https://github.com/LNReader/lnreader) — the plugin ecosystem that makes this app worth using, and the
   backup format it imports.
 
@@ -173,7 +173,6 @@ application hosts zero content.
 Copyright © 2015 Javier Tomás
 Copyright © 2024 Mihon Open Source Project
 Copyright © 2026 Nekori
-Copyright © 2026 Egg
 Copyright © 2026 Egg
 
 Licensed under the Apache License, Version 2.0 (the "License");
