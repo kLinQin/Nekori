@@ -432,7 +432,7 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
                 velocityX: Float,
                 velocityY: Float,
             ): Boolean {
-                if (!gestureTarget.allowsChapterSwipe()) return true
+                if (!gestureTarget.allowsChapterSwipe(isPaged = pagedController.enabled)) return true
                 if (isEditingMode) return false
                 val swipeEnabled = if (pagedController.enabled) {
                     preferences.novelPagedSwipeNavigation.get()
@@ -1022,9 +1022,12 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
                 val pageTurnConsumed = curlController.onTouchEvent(
                     event = event,
                     // The WebView classifies the target after this listener receives DOWN. Arm the
-                    // detector on DOWN, then require the document's SURFACE claim before MOVE can turn.
+                    // detector on DOWN, then require a swipe-eligible document claim before MOVE can turn.
                     canStart = pageTurnEnabled &&
-                        (event.actionMasked == MotionEvent.ACTION_DOWN || gestureTarget.allowsChapterSwipe()),
+                        (
+                            event.actionMasked == MotionEvent.ACTION_DOWN ||
+                                gestureTarget.allowsChapterSwipe(isPaged = pagedController.enabled)
+                            ),
                     readingDirection = curlReadingDirection(),
                     doubleSpread = pagedController.isDoubleSpread(),
                     effect = pageEffect,
@@ -1146,7 +1149,7 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
                 }
                 "gesture.claim" -> payload.string("owner")?.let {
                     gestureTarget = ReaderGestureTarget.fromWire(it)
-                    if (gestureTarget == ReaderGestureTarget.SURFACE) noteReadingInteraction()
+                    if (gestureTarget.allowsChapterSwipe(isPaged = pagedController.enabled)) noteReadingInteraction()
                 }
                 "gesture.ready" -> pageOwnsGestures = true
                 "tts.toggle" -> toggleTtsFromPage()
@@ -3894,7 +3897,6 @@ internal fun ReaderGestureTarget.tapAction(isVideoChapter: Boolean): ReaderTapAc
         }
     }
 
-/** Only the inert reader surface may become a chapter swipe; a seek drag must not change chapter. */
-internal fun ReaderGestureTarget.allowsChapterSwipe(): Boolean = this == ReaderGestureTarget.SURFACE
-
-
+/** Inline images can turn pages; image modals and interactive controls are classified as BLOCKED. */
+internal fun ReaderGestureTarget.allowsChapterSwipe(isPaged: Boolean): Boolean =
+    this == ReaderGestureTarget.SURFACE || (isPaged && this == ReaderGestureTarget.IMAGE)
