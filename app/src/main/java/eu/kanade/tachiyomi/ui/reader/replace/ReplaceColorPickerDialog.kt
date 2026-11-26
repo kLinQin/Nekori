@@ -165,7 +165,7 @@ fun ReplaceColorPickerDialog(
                         modifier = Modifier
                             .size(40.dp)
                             .clip(RoundedCornerShape(6.dp))
-                            .background(Color(android.graphics.Color.parseColor(hex))),
+                            .background(safeParseColor(hex)),
                     )
                     OutlinedTextField(
                         value = hex,
@@ -197,6 +197,18 @@ fun ReplaceColorPickerDialog(
             TextButton(onClick = onDismiss) { Text("Batal") }
         },
     )
+}
+
+private fun safeParseColor(hex: String): Color {
+    return if (HEX_REGEX.matches(hex)) {
+        try {
+            Color(android.graphics.Color.parseColor(hex))
+        } catch (_: IllegalArgumentException) {
+            Color.Transparent
+        }
+    } else {
+        Color.Transparent
+    }
 }
 
 // ---------- HSV <-> RGB <-> Hex helpers ----------
