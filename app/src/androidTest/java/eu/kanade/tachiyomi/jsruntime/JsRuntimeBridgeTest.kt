@@ -253,6 +253,59 @@ class JsRuntimeBridgeTest {
     }
 
     @Test
+    fun filterSuggestionsComeFromThePluginOrFallBackToFreeText() = runBlocking {
+        val runtime = createRuntime()
+        val withSuggestions = """
+            exports.default = {
+              id: 'suggest.test',
+              name: 'Suggest test',
+              version: '1',
+              site: 'https://suggest.invalid',
+              getFilterSuggestions: async (filterKey, query) => [
+                { label: filterKey + ':' + query, value: query },
+              ],
+            };
+        """.trimIndent()
+        runtime.call(
+            "plugin.load",
+            """{"id":"suggest.test","key":"suggest.test@v1","code":${quote(withSuggestions)}}""",
+        )
+
+        assertEquals(
+            "genres:abc",
+            Json.parseToJsonElement(
+                runtime.call(
+                    "plugin.filterSuggestions",
+                    """{"id":"suggest.test","key":"suggest.test@v1","filterKey":"genres","query":"abc"}""",
+                ),
+            ).jsonObject["suggestions"]?.jsonArray?.single()?.jsonObject?.get("label")?.jsonPrimitive?.content,
+        )
+
+        val withoutSuggestions = """
+            exports.default = {
+              id: 'plain.test',
+              name: 'Plain test',
+              version: '1',
+              site: 'https://plain.invalid',
+            };
+        """.trimIndent()
+        runtime.call(
+            "plugin.load",
+            """{"id":"plain.test","key":"plain.test@v1","code":${quote(withoutSuggestions)}}""",
+        )
+
+        assertEquals(
+            0,
+            Json.parseToJsonElement(
+                runtime.call(
+                    "plugin.filterSuggestions",
+                    """{"id":"plain.test","key":"plain.test@v1","filterKey":"genres","query":"abc"}""",
+                ),
+            ).jsonObject["suggestions"]?.jsonArray?.size,
+        )
+    }
+
+    @Test
     fun pluginApiCompatibilityIsCheckedByTheRuntime() = runBlocking {
         val runtime = createRuntime()
         for (version in listOf("undefined", "1", "0", "-1", "2", "1.5", "null", "'1'")) {
@@ -954,6 +1007,36 @@ class JsRuntimeBridgeTest {
                 """{"id":"missing.test","expression":"plugin.probe()"}""",
             ),
         )
+    }
+
+    @Test
+    fun pluginErrorModulePropagatesStructuredMetadataAcrossBridge() = runBlocking {
+        val runtime = createRuntime()
+        val code = """
+            const { PluginError, createPluginError } = require('@libs/pluginError');
+            exports.default = {
+              id: 'plugin-error.test',
+              name: 'PluginError test',
+              version: '1',
+              site: 'https://example.invalid',
+              parseChapter: async () => {
+                throw createPluginError(PluginError.RateLimited, {
+                  status: 429,
+                  url: 'https://example.invalid/ch/1',
+                });
+              },
+            };
+        """.trimIndent()
+
+        runtime.call("plugin.load", """{"id":"plugin-error.test","code":${quote(code)}}""")
+        try {
+            runtime.call("plugin.parseChapter", """{"id":"plugin-error.test","path":"/ch/1"}""")
+            fail("Expected structured PluginError rejection")
+        } catch (e: JsRuntimeException) {
+            assertEquals("Too many requests (429). Please try again later.", e.pluginErrorCode)
+            assertEquals(429, e.httpStatus)
+            assertEquals("https://example.invalid/ch/1", e.errorUrl)
+        }
     }
 
     @Test

@@ -86,6 +86,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.text.webview.curl.NovelPageCurlTurnD
 import eu.kanade.tachiyomi.ui.reader.viewer.text.webview.curl.NovelPageCurlView
 import eu.kanade.tachiyomi.ui.reader.viewer.text.webview.curl.finishAfterVisualState
 import eu.kanade.tachiyomi.ui.reader.viewer.text.webview.proxy.NovelReaderProxyServer
+import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.setUserAgent
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.CancellationException
@@ -250,6 +251,12 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
     @Volatile
     private var pageOwnsGestures = false
     private var pendingTtsParagraphIndex: Int? = null
+
+    // Set when a reload stopped TTS, to start it again from the restored position.
+    private var resumeTtsAfterRestore = false
+
+    // Set while a media reload re-renders the chapter a paused TTS session is on, so the session survives.
+    private var keepPausedTtsOnReload = false
     private val imageCache = NovelWebViewImageCache(activity.cacheDir, scope)
 
     private var lastSavedProgress = 0f
@@ -825,6 +832,19 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
                     )
                     if (targetUrl != null) {
                         navigateToEpubChapter(targetUrl)
+                        return true
+                    }
+                    if (request?.isForMainFrame == true && request.hasGesture()) {
+                        // Tapped links never navigate the reader away from the chapter.
+                        val url = request.url
+                        if (url != null &&
+                            (
+                                url.scheme.equals("http", ignoreCase = true) ||
+                                    url.scheme.equals("https", ignoreCase = true)
+                                )
+                        ) {
+                            activity.openInBrowser(url)
+                        }
                         return true
                     }
                     if (request?.isForMainFrame == true) {
@@ -1518,7 +1538,24 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
                     blockNetworkImage = blockMedia
                     loadsImagesAutomatically = !blockMedia
                 }
-                webView.reload()
+                flushProgress()
+                // A plain WebView reload never reaches the real-chapter path that installs the reader
+                // scripts, sanitizes media policy, and restores the saved position.
+                val resumeTts = resumeTtsAfterRestore || (ttsController.isTtsAutoPlay && !ttsController.isPaused())
+                val pausedChapterId = ttsController.ttsPlaybackChapterId.takeIf { ttsController.isPaused() }
+                val activeChapterId = (activity.viewModel.state.value.viewerChapters ?: currentChapters)
+                    ?.currChapter?.chapter?.id
+                keepPausedTtsOnReload = pausedChapterId != null && pausedChapterId == activeChapterId
+                try {
+                    reloadChapter()
+                } finally {
+                    if (keepPausedTtsOnReload) {
+                        ttsController.resetPlaybackChapterIndex()
+                    }
+                    keepPausedTtsOnReload = false
+                }
+                resumeTtsAfterRestore = resumeTts && activeChapterId != null
+                dispatchTtsState()
             },
             onTtsSettingsChanged = {
                 if (ttsController.ttsInitialized) ttsController.applySettings()
@@ -1611,6 +1648,7 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
         // wipe the chapter's saved progress.
         if (lastSavedProgress > 0f && !awaitingFirstScrollSample) saveProgress()
 
+        resumeTtsAfterRestore = false
         ttsController.destroy()
         curlController.destroy()
         imageCache.clear()
@@ -1698,12 +1736,13 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
         pushReaderChrome()
         if (isVideoChapter()) {
             pagedController.disable()
-            stopTts(preserveChapterLoad = true)
+            stopTts()
             val progress = currentPage?.chapter?.chapter?.last_page_read?.coerceIn(0, 100) ?: 0
             lastSavedProgress = progress / 100f
             lastPersistedPercent = progress
             awaitingFirstScrollSample = false
             isRestoringScroll = false
+            resumeTtsIfPending()
             activity.onNovelProgressChanged(lastSavedProgress)
         } else {
             pagedController.install(
@@ -1712,7 +1751,7 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
                 infinite = isInfiniteScrollEnabled(),
                 chapterId = currentChapters?.currChapter?.chapter?.id ?: -1L,
             )
-            if (isInfiniteScrollEnabled() || isPagedLayoutEnabled()) styler.injectScopedChapterAnchors()
+            styler.injectScopedChapterAnchors()
             styler.injectScrollTracking(isInfiniteScrollEnabled())
             styler.injectReaderUi()
             if (lastOutlineVariantColor.isNotEmpty()) {
@@ -1724,6 +1763,7 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
                 )
             }
             restoreScrollPosition()
+            if (!isRestoringScroll) resumeTtsIfPending()
             if (isEditingMode) toggleEditMode(true)
         }
         activity.showReadingMode(isPagedMode())
@@ -1848,7 +1888,7 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
             return
         }
         // Reuse the full document path, including queue reset and stale append cancellation.
-        stopTts(preserveChapterLoad = true)
+        stopTts()
         displayContent(page.chapter, page, showTranslationLoading = false)
     }
 
@@ -1887,7 +1927,7 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
         }
 
         cancelTtsChapterPreparation()
-        ttsController.stop()
+        if (!keepPausedTtsOnReload) ttsController.stop()
 
         if (!isInfiniteScrollEnabled() || loadedChapterIds.isEmpty()) {
             chapterQueue.clear()
@@ -2666,7 +2706,7 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
 
     private fun currentTtsState(): TtsPlaybackState = when {
         ttsController.isPaused() -> TtsPlaybackState.PAUSED
-        pendingTtsAutoStartOnLoad || ttsController.isTtsAutoPlay ||
+        pendingTtsAutoStartOnLoad || resumeTtsAfterRestore || ttsController.isTtsAutoPlay ||
             ttsController.isSpeaking() || ttsController.isStarting() ->
             TtsPlaybackState.PLAYING
         else -> TtsPlaybackState.STOPPED
@@ -2794,6 +2834,10 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
         val formatted = ErrorFormatter.format(error)
         logcat(LogPriority.ERROR) { "NovelWebViewViewer: Chapter load failed\n${formatted.stackTrace}" }
         docState = DocState.ERROR
+        if (resumeTtsAfterRestore) {
+            resumeTtsAfterRestore = false
+            dispatchTtsState()
+        }
         protectedMediaPlaybackArmed = false
         protectedMediaPlaybackOrigin = null
 
@@ -3130,7 +3174,14 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
     private fun liftRestoreGuard(token: Int) {
         if (token != scrollRestoreToken) return
         isRestoringScroll = false
+        resumeTtsIfPending()
         resetChapterTracking()
+    }
+
+    private fun resumeTtsIfPending() {
+        if (!resumeTtsAfterRestore) return
+        resumeTtsAfterRestore = false
+        if (!isVideoChapter()) startTtsFromViewport() else dispatchTtsState()
     }
 
     private fun resetChapterTracking() {
@@ -3558,8 +3609,11 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
     }
 
     fun reloadChapter() {
-        val chapters = currentChapters ?: return
+        // An infinite-scroll append makes a chapter active in the view model only, so its state names
+        // the chapter being read.
+        val chapters = activity.viewModel.state.value.viewerChapters ?: currentChapters ?: return
         invalidateLoadedChapters()
+        currentChapterIndex = 0
         setChapters(chapters)
     }
 
@@ -3568,7 +3622,7 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
     }
 
     fun setTtsEnabled(enabled: Boolean) {
-        if (!enabled && isTtsActive()) stopTts(preserveChapterLoad = true)
+        if (!enabled && isTtsActive()) stopTts()
         styler.setTtsEnabled(enabled)
     }
 
@@ -3628,15 +3682,14 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
         }
     }
 
-    fun stopTts(preserveChapterLoad: Boolean = false) {
+    fun stopTts() {
         logcat(LogPriority.DEBUG) {
             "TTS (WebView): stopTts called ts=${System.currentTimeMillis()} currentChapterIndex=$currentChapterIndex, ttsCurrentChunkIndex=${ttsController.ttsCurrentChunkIndex}, ttsResumeChunkIndex=${ttsController.ttsResumeChunkIndex}, ttsPlaybackChapterIndex=${ttsController.ttsPlaybackChapterIndex}, ttsPlaybackChapterId=${ttsController.ttsPlaybackChapterId}"
         }
+        resumeTtsAfterRestore = false
         pendingTtsAutoStartOnLoad = false
         pendingTtsParagraphIndex = null
-        // Drop a pending real-load signal so a stale onPageFinished after stop can't inject; leave a
-        // committed READY/ERROR document intact.
-        if (!preserveChapterLoad && docState == DocState.LOADING_REAL) docState = DocState.LOADING
+        // A chapter load in flight still has to finish setting up the reader, so docState stays as is.
         ttsController.stop()
         cancelTtsChapterPreparation()
         dispatchTtsState()
